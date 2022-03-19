@@ -109,8 +109,6 @@ export default class TodoItem {
       }
     })
 
-    console.log(filter, conditionals)
-
     return new Promise((resolve, reject) => {
       databaseHandle.serialize(() => {
         databaseHandle.all(
