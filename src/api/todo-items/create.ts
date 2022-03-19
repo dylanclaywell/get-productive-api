@@ -1,17 +1,13 @@
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 
-import TodoItem, { CreateTodoItemArgs } from '../models/TodoItem'
-import isObject from '../lib/isObject'
+import TodoItem, { CreateTodoItemArgs } from '../../models/TodoItem'
+import isObject from '../../lib/isObject'
 
 function bodyIsValid(body: unknown): body is CreateTodoItemArgs {
   return isObject(body) && 'title' in body
 }
 
-export default function createTodoItem(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export default function create(req: Request, res: Response) {
   const body: unknown = req.body
 
   if (!bodyIsValid(body)) {

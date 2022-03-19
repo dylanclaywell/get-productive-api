@@ -1,9 +1,9 @@
 import express from 'express'
 
-import createTodoItem from './createTodoItem'
+import todoItems from './todo-items'
 
 const router = express.Router()
 
-router.post('/api/createTodoItem', createTodoItem)
+router.use('/api/todo-items', todoItems)
 
 export default router
