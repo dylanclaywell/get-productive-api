@@ -1,19 +1,9 @@
 import { v4 as generateId } from 'uuid'
 
 import getDatabase from '../lib/database'
-import { TodoItemTable } from '../types/TodoItems'
+import { TodoItem as TodoItemType } from '../types/TodoItems'
 
 type ValueOf<T> = T[keyof T]
-
-export interface TodoItemProps {
-  id: string
-  title: string
-  description?: string
-  notes?: string
-  isCompleted: boolean
-  dateCompleted: Date | undefined
-  dateCreated: Date
-}
 
 export interface CreateTodoItemArgs {
   title: string
@@ -60,34 +50,42 @@ export default class TodoItem {
 
     const id = this.generateNewId()
 
-    databaseHandle.serialize(() => {
-      const statement = databaseHandle.prepare(`
-        insert into todoItems (
-          id,
-          title,
-          isCompleted,
-          dateCreated
-        ) values (
-          ?,
-          ?,
-          ?,
-          ?
-        )
-      `)
+    return new Promise<void>((resolve, reject) => {
+      databaseHandle.serialize(() => {
+        const statement = databaseHandle.prepare(`
+          insert into todoItems (
+            id,
+            title,
+            isCompleted,
+            dateCreated
+          ) values (
+            ?,
+            ?,
+            ?,
+            ?
+          )
+        `)
 
-      statement.run(id, args.title, 0, new Date().toISOString())
-      statement.finalize()
+        statement.run(id, args.title, 0, new Date().toISOString())
+        statement.finalize((err) => {
+          if (err) {
+            reject(err)
+          }
+
+          resolve()
+        })
+      })
     })
   }
 
-  static find(filter?: Partial<TodoItemTable>): Promise<TodoItemTable[]> {
+  static find(filter?: Partial<TodoItemType>): Promise<TodoItemType[]> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
       throw new Error('No database connection')
     }
 
-    const filterParams: (keyof TodoItemTable)[] = [
+    const filterParams: (keyof TodoItemType)[] = [
       'id',
       'description',
       'isCompleted',
@@ -98,7 +96,7 @@ export default class TodoItem {
     ]
 
     const conditionals: string[] = []
-    const params: ValueOf<TodoItemTable>[] = []
+    const params: ValueOf<TodoItemType>[] = []
 
     filterParams.forEach((param) => {
       const filterParam = filter ? filter[param] : undefined
@@ -125,7 +123,7 @@ export default class TodoItem {
           ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
         `,
           params,
-          (error, rows: TodoItemTable[]) => {
+          (error, rows: TodoItemType[]) => {
             if (error) {
               reject(error)
             }

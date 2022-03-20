@@ -1,18 +1,35 @@
 import express from 'express'
+import { graphqlHTTP } from 'express-graphql'
+import { createApplication } from 'graphql-modules'
 
-import api from './api'
+import rootModule from './modules/root'
+import todoItemModule from './modules/todoItem'
 import getDatabase, { connectToDatabase } from './lib/database'
 
-const app = express()
-const port = 3000
+const server = express()
+const port = 4000
 
-app.get('/', (req, res) => {
+server.get('/', (req, res) => {
   res.send('Hello world')
 })
 
-app.use(express.json())
+server.use(express.json())
 
-app.use(api)
+const application = createApplication({
+  modules: [rootModule, todoItemModule],
+})
+
+const schema = application.schema
+const execute = application.createExecution()
+
+server.use(
+  '/',
+  graphqlHTTP({
+    schema,
+    customExecuteFn: execute,
+    graphiql: true,
+  })
+)
 
 connectToDatabase((error) => {
   if (error || !getDatabase()) {
@@ -22,7 +39,7 @@ connectToDatabase((error) => {
 
   console.log('Connected to SQLite database')
 
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Listening at http://localhost:${port}`)
   })
 })
