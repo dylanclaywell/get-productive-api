@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import isObject from '../../lib/isObject'
-import TodoItem from '../../models/TodoItem'
+import TodoItem, { TodoItemProps } from '../../models/TodoItem'
 import { TodoItemTable } from '../../types/TodoItems'
 
 function paramsAreValid(params: unknown): params is { id: string } {
@@ -17,7 +17,7 @@ export default async function getById(req: Request, res: Response) {
 
   let todoItems: TodoItemTable[] = []
   try {
-    todoItems = (await TodoItem.find({ id: params.id })) as any
+    todoItems = await TodoItem.find({ id: params.id })
   } catch (e) {
     console.log(e)
     res.status(500).json({ message: 'Error finding todo item' })

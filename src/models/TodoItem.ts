@@ -10,7 +10,6 @@ export interface TodoItemProps {
   title: string
   description?: string
   notes?: string
-  tags?: string[]
   isCompleted: boolean
   dateCompleted: Date | undefined
   dateCreated: Date
@@ -32,7 +31,7 @@ export default class TodoItem {
 
     databaseHandle.serialize(() => {
       databaseHandle.each(
-        'select id from todo_items where id = ?',
+        'select id from todoItems where id = ?',
         [id],
         (error, row) => {
           todoItems.push(row)
@@ -63,11 +62,11 @@ export default class TodoItem {
 
     databaseHandle.serialize(() => {
       const statement = databaseHandle.prepare(`
-        insert into todo_items (
+        insert into todoItems (
           id,
           title,
-          is_completed,
-          date_created
+          isCompleted,
+          dateCreated
         ) values (
           ?,
           ?,
@@ -91,11 +90,11 @@ export default class TodoItem {
     const filterParams: (keyof TodoItemTable)[] = [
       'id',
       'description',
-      'is_completed',
+      'isCompleted',
       'notes',
       'title',
-      'date_completed',
-      'date_created',
+      'dateCompleted',
+      'dateCreated',
     ]
 
     const conditionals: string[] = []
@@ -118,11 +117,11 @@ export default class TodoItem {
             title,
             description,
             notes,
-            is_completed,
-            date_created,
-            date_completed
+            isCompleted,
+            dateCreated,
+            dateCompleted
           from
-            todo_items
+            todoItems
           ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
         `,
           params,

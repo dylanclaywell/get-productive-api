@@ -3,7 +3,7 @@ export interface TodoItemTable {
   title: string
   description: string | null
   notes: string | null
-  is_completed: number
-  date_created: string
-  date_completed: string | null
+  isCompleted: number
+  dateCreated: string
+  dateCompleted: string | null
 }

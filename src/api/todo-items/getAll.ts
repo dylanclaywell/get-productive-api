@@ -8,16 +8,9 @@ function paramsAreValid(params: unknown): params is { id: string } {
 }
 
 export default async function getAll(req: Request, res: Response) {
-  // const params: unknown = req.params
-
-  // if (!paramsAreValid(params)) {
-  //   res.status(400).json({ message: 'Invalid request (1)' })
-  //   return
-  // }
-
   let todoItems: TodoItemTable[] = []
   try {
-    todoItems = (await TodoItem.find()) as any
+    todoItems = await TodoItem.find()
   } catch (e) {
     console.log(e)
     res.status(500).json({ message: 'Error finding todo item' })
