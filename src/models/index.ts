@@ -1,4 +1,4 @@
-export interface TodoItem {
+export type TodoItemModel = {
   id: string
   title: string
   description: string | null

@@ -1,7 +1,7 @@
 import { v4 as generateId } from 'uuid'
 
 import getDatabase from '../lib/database'
-import { TodoItem as TodoItemType } from '../types/TodoItems'
+import { TodoItemModel } from './index'
 
 type ValueOf<T> = T[keyof T]
 
@@ -41,7 +41,7 @@ export default class TodoItem {
     return id
   }
 
-  static create(args: CreateTodoItemArgs) {
+  static create(args: CreateTodoItemArgs): Promise<string> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
@@ -50,9 +50,8 @@ export default class TodoItem {
 
     const id = this.generateNewId()
 
-    return new Promise<void>((resolve, reject) => {
-      databaseHandle.serialize(() => {
-        const statement = databaseHandle.prepare(`
+    return new Promise<string>((resolve, reject) => {
+      const statement = databaseHandle.prepare(`
           insert into todoItems (
             id,
             title,
@@ -66,26 +65,25 @@ export default class TodoItem {
           )
         `)
 
-        statement.run(id, args.title, 0, new Date().toISOString())
-        statement.finalize((err) => {
-          if (err) {
-            reject(err)
-          }
+      statement.run(id, args.title, 0, new Date().toISOString())
+      statement.finalize((err) => {
+        if (err) {
+          reject(err)
+        }
 
-          resolve()
-        })
+        resolve(id)
       })
     })
   }
 
-  static find(filter?: Partial<TodoItemType>): Promise<TodoItemType[]> {
+  static find(filter?: Partial<TodoItemModel>): Promise<TodoItemModel[]> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
       throw new Error('No database connection')
     }
 
-    const filterParams: (keyof TodoItemType)[] = [
+    const filterParams: (keyof TodoItemModel)[] = [
       'id',
       'description',
       'isCompleted',
@@ -96,7 +94,7 @@ export default class TodoItem {
     ]
 
     const conditionals: string[] = []
-    const params: ValueOf<TodoItemType>[] = []
+    const params: ValueOf<TodoItemModel>[] = []
 
     filterParams.forEach((param) => {
       const filterParam = filter ? filter[param] : undefined
@@ -107,9 +105,8 @@ export default class TodoItem {
     })
 
     return new Promise((resolve, reject) => {
-      databaseHandle.serialize(() => {
-        databaseHandle.all(
-          `
+      databaseHandle.all(
+        `
           select
             id,
             title,
@@ -122,16 +119,15 @@ export default class TodoItem {
             todoItems
           ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
         `,
-          params,
-          (error, rows: TodoItemType[]) => {
-            if (error) {
-              reject(error)
-            }
-
-            resolve(rows)
+        params,
+        (error, rows: TodoItemModel[]) => {
+          if (error) {
+            reject(error)
           }
-        )
-      })
+
+          resolve(rows)
+        }
+      )
     })
   }
 }

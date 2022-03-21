@@ -1,6 +1,28 @@
 import { createModule, gql } from 'graphql-modules'
+
+import { Resolvers } from '../generated/graphql'
 import TodoItem from '../models/TodoItem'
-import { TodoItem as TodoItemTableType } from '../types/todoItems'
+
+const resolvers: Resolvers = {
+  TodoItem: {
+    isCompleted: (todoItem) => Boolean(todoItem.isCompleted),
+  },
+  Query: {
+    todoItem: async (root, { id }) => {
+      return (await TodoItem.find({ id }))[0]
+    },
+    todoItems: async () => {
+      return await TodoItem.find()
+    },
+  },
+  Mutation: {
+    createTodoItem: async (root, { input }) => {
+      const id = await TodoItem.create({ title: input.title })
+
+      return (await TodoItem.find({ id }))[0]
+    },
+  },
+}
 
 export default createModule({
   id: 'todoItem',
@@ -31,26 +53,5 @@ export default createModule({
       }
     `,
   ],
-  resolvers: {
-    TodoItem: {
-      isCompleted: (todoItem: TodoItemTableType) =>
-        Boolean(todoItem.isCompleted),
-    },
-    Query: {
-      todoItem: async (root: any, { id }: { id: string }) => {
-        return (await TodoItem.find({ id }))[0]
-      },
-      todoItems: async () => {
-        return await TodoItem.find()
-      },
-    },
-    Mutation: {
-      createTodoItem: async (
-        root: any,
-        { input }: { input: { title: string } }
-      ) => {
-        await TodoItem.create({ title: input.title })
-      },
-    },
-  },
+  resolvers,
 })

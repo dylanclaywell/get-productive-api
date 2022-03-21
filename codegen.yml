@@ -1,0 +1,11 @@
+overwrite: true
+schema: './src/modules/**/*.ts'
+documents: null
+generates:
+  src/generated/graphql.ts:
+    plugins:
+      - 'typescript'
+      - 'typescript-resolvers'
+    config:
+      mappers:
+        TodoItem: ../models#TodoItemModel
