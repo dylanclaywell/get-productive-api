@@ -1,6 +1,7 @@
 import express from 'express'
 import { graphqlHTTP } from 'express-graphql'
 import { createApplication } from 'graphql-modules'
+import cors from 'cors'
 
 import rootModule from './modules/root'
 import todoItemModule from './modules/todoItem'
@@ -21,6 +22,12 @@ const application = createApplication({
 
 const schema = application.schema
 const execute = application.createExecution()
+
+const corsOptions: cors.CorsOptions = {
+  origin: ['http://localhost:3000'],
+}
+
+server.use(cors(corsOptions))
 
 server.use(
   '/',
