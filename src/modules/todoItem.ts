@@ -26,6 +26,11 @@ const resolvers: Resolvers = {
 
       return id
     },
+    updateTodoItem: async (root, { input }) => {
+      await TodoItem.update(input)
+
+      return (await TodoItem.find({ id: input.id }))[0]
+    },
   },
 }
 

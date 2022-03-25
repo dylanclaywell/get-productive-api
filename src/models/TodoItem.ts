@@ -1,4 +1,8 @@
 import { v4 as generateId } from 'uuid'
+import {
+  UpdateTodoItemInput,
+  TodoItem as TodoItemGql,
+} from '../generated/graphql'
 
 import getDatabase from '../lib/database'
 import { TodoItemModel } from './index'
@@ -147,6 +151,53 @@ export default class TodoItem {
         (error) => {
           if (error) {
             reject()
+          }
+
+          resolve()
+        }
+      )
+    })
+  }
+
+  static update(args: UpdateTodoItemInput): Promise<void> {
+    const databaseHandle = getDatabase()
+
+    if (!databaseHandle) {
+      throw new Error('No database connection')
+    }
+
+    const updateParams: (keyof UpdateTodoItemInput)[] = [
+      'description',
+      'isCompleted',
+      'notes',
+      'title',
+      'dateCompleted',
+      'dateCreated',
+    ]
+
+    const set: string[] = []
+    const params: ValueOf<TodoItemGql>[] = []
+
+    updateParams.forEach((updateParam) => {
+      const param = args ? args[updateParam] : undefined
+      if (param) {
+        set.push(`${updateParam} = ?`)
+        params.push(param)
+      }
+    })
+
+    return new Promise((resolve, reject) => {
+      databaseHandle.run(
+        `
+          update
+            todoItems
+          ${set.length > 0 ? `set ${set.join(',')}` : ''}
+          where id = ?
+        `,
+        [...params, args.id],
+        (error) => {
+          if (error) {
+            reject(error)
           }
 
           resolve()
