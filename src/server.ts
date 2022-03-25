@@ -7,6 +7,7 @@ import { createApplication } from 'graphql-modules'
 import rootModule from './modules/root'
 import todoItemModule from './modules/todoItem'
 import getDatabase, { connectToDatabase } from './lib/database'
+import logger from './logger'
 
 export function startServer({ port }: { port: number }) {
   const app = express()
@@ -38,14 +39,14 @@ export function startServer({ port }: { port: number }) {
   return new Promise((resolve) => {
     connectToDatabase((error) => {
       if (error || !getDatabase()) {
-        console.log('Could not connect to database')
+        logger.log('error', 'Could not connect to database')
         process.exit(1)
       }
 
-      console.log('Connected to SQLite database')
+      logger.log('info', 'Connected to SQLite database')
 
       const server = app.listen(port, () => {
-        console.log(`Listening at http://localhost:${port}`)
+        logger.log('info', `Listening at http://localhost:${port}`)
       })
 
       setupCloseOnExit(server)
@@ -59,11 +60,11 @@ function setupCloseOnExit(server: http.Server) {
   function exitHandler({ exit }: { exit: boolean }) {
     server.close((error) => {
       if (error) {
-        console.warn('Something went wrong closing the server', error.stack)
+        logger.log('error', 'Something went wrong closing the server')
         return
       }
 
-      console.info('Server successfully closed')
+      logger.log('info', 'Server successfully closed')
 
       if (exit) {
         process.exit()

@@ -6,17 +6,19 @@
   "author": "Dylan Claywell <djclaywell@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon -V",
+    "start": "nodemon",
     "codegen": "graphql-codegen --config codegen.yml"
   },
   "dependencies": {
+    "chalk": "4.1.2",
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "express-graphql": "^0.12.0",
     "graphql": "^16.3.0",
     "graphql-modules": "^2.0.0",
     "sqlite3": "^5.0.2",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "winston": "^3.6.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "2.6.2",

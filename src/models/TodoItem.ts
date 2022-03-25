@@ -5,6 +5,7 @@ import {
 } from '../generated/graphql'
 
 import getDatabase from '../lib/database'
+import logger from '../logger'
 import { TodoItemModel } from './index'
 
 type ValueOf<T> = T[keyof T]
@@ -55,7 +56,8 @@ export default class TodoItem {
     const id = this.generateNewId()
 
     return new Promise<string>((resolve, reject) => {
-      const statement = databaseHandle.prepare(`
+      databaseHandle.run(
+        `
           insert into todoItems (
             id,
             title,
@@ -67,16 +69,18 @@ export default class TodoItem {
             ?,
             ?
           )
-        `)
+        `,
+        [id, args.title, 0, new Date().toISOString()],
+        (error) => {
+          if (error) {
+            reject(error)
+          }
 
-      statement.run(id, args.title, 0, new Date().toISOString())
-      statement.finalize((err) => {
-        if (err) {
-          reject(err)
+          logger.log('info', `Created todo item ${id}`)
+
+          resolve(id)
         }
-
-        resolve(id)
-      })
+      )
     })
   }
 
@@ -128,6 +132,8 @@ export default class TodoItem {
           if (error) {
             reject(error)
           }
+
+          logger.log('info', 'Found todo items')
 
           resolve(rows)
         }
@@ -199,6 +205,8 @@ export default class TodoItem {
           if (error) {
             reject(error)
           }
+
+          logger.log('info', `Successfully updated todo item ${args.id}`)
 
           resolve()
         }
