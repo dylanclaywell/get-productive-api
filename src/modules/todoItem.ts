@@ -48,6 +48,16 @@ export default createModule({
         title: String!
       }
 
+      input UpdateTodoItemInput {
+        id: ID!
+        title: String
+        description: String
+        notes: String
+        isCompleted: Boolean
+        dateCreated: String
+        dateCompleted: String
+      }
+
       extend type Query {
         todoItem(id: String!): TodoItem
         todoItems: [TodoItem!]!
@@ -56,6 +66,7 @@ export default createModule({
       extend type Mutation {
         createTodoItem(input: CreateTodoItemInput!): TodoItem
         deleteTodoItem(id: String!): String!
+        updateTodoItem(input: UpdateTodoItemInput!): TodoItem!
       }
     `,
   ],
