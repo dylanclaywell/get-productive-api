@@ -21,6 +21,11 @@ const resolvers: Resolvers = {
 
       return (await TodoItem.find({ id }))[0]
     },
+    deleteTodoItem: async (root, { id }) => {
+      await TodoItem.delete({ id })
+
+      return id
+    },
   },
 }
 
@@ -50,6 +55,7 @@ export default createModule({
 
       extend type Mutation {
         createTodoItem(input: CreateTodoItemInput!): TodoItem
+        deleteTodoItem(id: String!): String!
       }
     `,
   ],

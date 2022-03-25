@@ -22,11 +22,17 @@ export type CreateTodoItemInput = {
 export type Mutation = {
   __typename?: 'Mutation';
   createTodoItem?: Maybe<TodoItem>;
+  deleteTodoItem: Scalars['String'];
 };
 
 
 export type MutationCreateTodoItemArgs = {
   input: CreateTodoItemInput;
+};
+
+
+export type MutationDeleteTodoItemArgs = {
+  id: Scalars['String'];
 };
 
 export type Query = {
@@ -142,6 +148,7 @@ export type ResolversParentTypes = {
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createTodoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
+  deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {

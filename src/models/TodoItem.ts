@@ -130,4 +130,28 @@ export default class TodoItem {
       )
     })
   }
+
+  static delete({ id }: { id: string }): Promise<void> {
+    const databaseHandle = getDatabase()
+
+    if (!databaseHandle) {
+      throw new Error('No database connection')
+    }
+
+    return new Promise((resolve, reject) => {
+      databaseHandle.run(
+        `
+          delete from todoItems where id = ?;
+        `,
+        [id],
+        (error) => {
+          if (error) {
+            reject()
+          }
+
+          resolve()
+        }
+      )
+    })
+  }
 }
