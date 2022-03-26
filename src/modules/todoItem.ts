@@ -11,8 +11,20 @@ const resolvers: Resolvers = {
     todoItem: async (root, { id }) => {
       return (await TodoItem.find({ id }))[0]
     },
-    todoItems: async () => {
-      return await TodoItem.find()
+    todoItems: async (root, { input }) => {
+      return await TodoItem.find(
+        input
+          ? {
+              dateCompleted: input.dateCompleted,
+              dateCreated: input.dateCreated ?? undefined,
+              description: input.description ?? undefined,
+              id: input.id ?? undefined,
+              isCompleted: input.isCompleted ?? undefined,
+              notes: input.notes ?? undefined,
+              title: input.title ?? undefined,
+            }
+          : undefined
+      )
     },
   },
   Mutation: {
@@ -63,9 +75,19 @@ export default createModule({
         dateCompleted: String
       }
 
+      input GetTodoItemsInput {
+        id: ID
+        title: String
+        description: String
+        notes: String
+        isCompleted: Boolean
+        dateCreated: String
+        dateCompleted: String
+      }
+
       extend type Query {
         todoItem(id: String!): TodoItem
-        todoItems: [TodoItem!]!
+        todoItems(input: GetTodoItemsInput): [TodoItem!]!
       }
 
       extend type Mutation {

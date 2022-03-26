@@ -19,6 +19,16 @@ export type CreateTodoItemInput = {
   title: Scalars['String'];
 };
 
+export type GetTodoItemsInput = {
+  dateCompleted?: InputMaybe<Scalars['String']>;
+  dateCreated?: InputMaybe<Scalars['String']>;
+  description?: InputMaybe<Scalars['String']>;
+  id?: InputMaybe<Scalars['ID']>;
+  isCompleted?: InputMaybe<Scalars['Boolean']>;
+  notes?: InputMaybe<Scalars['String']>;
+  title?: InputMaybe<Scalars['String']>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   createTodoItem?: Maybe<TodoItem>;
@@ -50,6 +60,11 @@ export type Query = {
 
 export type QueryTodoItemArgs = {
   id: Scalars['String'];
+};
+
+
+export type QueryTodoItemsArgs = {
+  input?: InputMaybe<GetTodoItemsInput>;
 };
 
 export type TodoItem = {
@@ -144,6 +159,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateTodoItemInput: CreateTodoItemInput;
+  GetTodoItemsInput: GetTodoItemsInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
@@ -156,6 +172,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   CreateTodoItemInput: CreateTodoItemInput;
+  GetTodoItemsInput: GetTodoItemsInput;
   ID: Scalars['ID'];
   Mutation: {};
   Query: {};
@@ -172,7 +189,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   todoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemArgs, 'id'>>;
-  todoItems?: Resolver<Array<ResolversTypes['TodoItem']>, ParentType, ContextType>;
+  todoItems?: Resolver<Array<ResolversTypes['TodoItem']>, ParentType, ContextType, Partial<QueryTodoItemsArgs>>;
 };
 
 export type TodoItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['TodoItem'] = ResolversParentTypes['TodoItem']> = {

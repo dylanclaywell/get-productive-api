@@ -1,9 +1,9 @@
 import { v4 as generateId } from 'uuid'
+
 import {
   UpdateTodoItemInput,
   TodoItem as TodoItemGql,
 } from '../generated/graphql'
-
 import getDatabase from '../lib/database'
 import logger from '../logger'
 import { TodoItemModel } from './index'
@@ -84,14 +84,14 @@ export default class TodoItem {
     })
   }
 
-  static find(filter?: Partial<TodoItemModel>): Promise<TodoItemModel[]> {
+  static find(filter?: Partial<TodoItemGql>): Promise<TodoItemModel[]> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
       throw new Error('No database connection')
     }
 
-    const filterParams: (keyof TodoItemModel)[] = [
+    const filterParams: (keyof TodoItemGql)[] = [
       'id',
       'description',
       'isCompleted',
@@ -102,12 +102,28 @@ export default class TodoItem {
     ]
 
     const conditionals: string[] = []
-    const params: ValueOf<TodoItemModel>[] = []
+    const params: ValueOf<TodoItemGql>[] = []
 
     filterParams.forEach((param) => {
-      const filterParam = filter ? filter[param] : undefined
-      if (filterParam) {
-        conditionals.push(`${param} = ?`)
+      let filterParam = filter ? filter[param] : undefined
+      if (filterParam !== undefined && filterParam !== null) {
+        if (
+          typeof filterParam === 'string' &&
+          (param === 'dateCreated' || param === 'dateCompleted')
+        ) {
+          conditionals.push(`date(${param}) = ?`)
+          const date = new Date(filterParam)
+          filterParam = `${date.getUTCFullYear()}-${
+            date.getUTCMonth() + 1 < 10
+              ? `0${date.getUTCMonth() + 1}`
+              : date.getUTCMonth() + 1
+          }-${
+            date.getUTCDate() < 10 ? `0${date.getUTCDate()}` : date.getUTCDate()
+          }`
+        } else {
+          conditionals.push(`${param} = ?`)
+        }
+
         params.push(filterParam)
       }
     })
