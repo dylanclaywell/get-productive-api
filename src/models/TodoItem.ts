@@ -142,6 +142,7 @@ export default class TodoItem {
           from
             todoItems
           ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
+          or isCompleted = 0
         `,
         params,
         (error, rows: TodoItemModel[]) => {
