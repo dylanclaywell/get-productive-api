@@ -159,6 +159,8 @@ export default class TodoItem {
             reject()
           }
 
+          logger.log('info', `Successfully deleted todo item ${id}`)
+
           resolve()
         }
       )
