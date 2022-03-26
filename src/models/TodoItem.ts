@@ -186,7 +186,7 @@ export default class TodoItem {
 
     updateParams.forEach((updateParam) => {
       const param = args ? args[updateParam] : undefined
-      if (param) {
+      if (param !== undefined) {
         set.push(`${updateParam} = ?`)
         params.push(param)
       }
