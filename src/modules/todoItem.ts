@@ -1,7 +1,30 @@
 import { createModule, gql } from 'graphql-modules'
 
-import { Resolvers } from '../generated/graphql'
+import { Resolvers, DateInput } from '../generated/graphql'
 import TodoItem from '../models/TodoItem'
+
+function nullable<Field>(field: Field) {
+  if (field === null) {
+    return null
+  }
+
+  return field
+}
+
+function nullableDateInput(
+  dateInput: DateInput | null | undefined,
+  key: keyof DateInput
+) {
+  if (dateInput === null) {
+    return null
+  }
+
+  if (dateInput?.[key] === null) {
+    return null
+  }
+
+  return dateInput?.[key]
+}
 
 const resolvers: Resolvers = {
   TodoItem: {
@@ -71,16 +94,16 @@ const resolvers: Resolvers = {
     },
     updateTodoItem: async (root, { input }) => {
       await TodoItem.update({
-        description: input?.description,
-        id: input?.id,
-        isCompleted: input?.isCompleted ? 1 : 0,
-        notes: input?.notes,
-        dateCompleted: input?.dateCompleted?.date,
-        timeCompleted: input?.dateCompleted?.time,
-        timezoneCompleted: input?.dateCompleted?.timezone,
-        dateCreated: input?.dateCreated?.date,
-        timeCreated: input?.dateCreated?.time,
-        timezoneCreated: input?.dateCreated?.timezone,
+        description: nullable(input.description),
+        id: input.id,
+        isCompleted: input.isCompleted ? 1 : 0,
+        notes: nullable(input.notes),
+        dateCompleted: nullableDateInput(input.dateCompleted, 'date'),
+        timeCompleted: nullableDateInput(input.dateCompleted, 'time'),
+        timezoneCompleted: nullableDateInput(input.dateCompleted, 'timezone'),
+        dateCreated: input.dateCreated?.date,
+        timeCreated: input.dateCreated?.time,
+        timezoneCreated: input.dateCreated?.timezone,
       })
 
       return (await TodoItem.find({ id: input.id }))[0]
