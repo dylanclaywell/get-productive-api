@@ -30,17 +30,24 @@ const resolvers: Resolvers = {
       return await TodoItem.find(
         input
           ? {
-              dateCompleted: input.dateCompleted?.date,
-              timeCompleted: input.dateCompleted?.time,
-              timezoneCompleted: input.dateCompleted?.timezone,
-              dateCreated: input.dateCreated?.date,
-              timeCreated: input.dateCreated?.time,
-              timezoneCreated: input.dateCreated?.timezone,
+              dateCompleted: input.dateCompleted?.date ?? undefined,
+              timeCompleted: input.dateCompleted?.time ?? undefined,
+              timezoneCompleted: input.dateCompleted?.timezone ?? undefined,
+              dateCreated: input.dateCreated?.date ?? undefined,
+              timeCreated: input.dateCreated?.time ?? undefined,
+              timezoneCreated: input.dateCreated?.timezone ?? undefined,
               description: input.description ?? undefined,
               id: input.id ?? undefined,
-              isCompleted: input.isCompleted ? 1 : 0,
+              isCompleted:
+                input.isCompleted === null || input.isCompleted === undefined
+                  ? undefined
+                  : input.isCompleted
+                  ? 1
+                  : 0,
               notes: input.notes ?? undefined,
               title: input.title ?? undefined,
+              overrideIncompleteItems:
+                input.filters?.overrideIncompleteItems ?? false,
             }
           : undefined
       )
@@ -108,6 +115,16 @@ export default createModule({
         timezone: String!
       }
 
+      input GetDateInput {
+        date: String
+        time: String
+        timezone: String
+      }
+
+      input Filters {
+        overrideIncompleteItems: Boolean
+      }
+
       input CreateTodoItemInput {
         title: String!
         dateCreated: DateInput!
@@ -129,8 +146,9 @@ export default createModule({
         description: String
         notes: String
         isCompleted: Boolean
-        dateCreated: DateInput
-        dateCompleted: DateInput
+        dateCreated: GetDateInput
+        dateCompleted: GetDateInput
+        filters: Filters
       }
 
       extend type Query {

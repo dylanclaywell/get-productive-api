@@ -33,10 +33,21 @@ export type DateInput = {
   timezone: Scalars['String'];
 };
 
+export type Filter = {
+  overrideIncompleteItems?: InputMaybe<Scalars['Boolean']>;
+};
+
+export type GetDateInput = {
+  date?: InputMaybe<Scalars['String']>;
+  time?: InputMaybe<Scalars['String']>;
+  timezone?: InputMaybe<Scalars['String']>;
+};
+
 export type GetTodoItemsInput = {
-  dateCompleted?: InputMaybe<DateInput>;
-  dateCreated?: InputMaybe<DateInput>;
+  dateCompleted?: InputMaybe<GetDateInput>;
+  dateCreated?: InputMaybe<GetDateInput>;
   description?: InputMaybe<Scalars['String']>;
+  filters?: InputMaybe<Filter>;
   id?: InputMaybe<Scalars['ID']>;
   isCompleted?: InputMaybe<Scalars['Boolean']>;
   notes?: InputMaybe<Scalars['String']>;
@@ -175,6 +186,8 @@ export type ResolversTypes = {
   CreateTodoItemInput: CreateTodoItemInput;
   Date: ResolverTypeWrapper<Date>;
   DateInput: DateInput;
+  Filter: Filter;
+  GetDateInput: GetDateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -190,6 +203,8 @@ export type ResolversParentTypes = {
   CreateTodoItemInput: CreateTodoItemInput;
   Date: Date;
   DateInput: DateInput;
+  Filter: Filter;
+  GetDateInput: GetDateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: Scalars['ID'];
   Mutation: {};

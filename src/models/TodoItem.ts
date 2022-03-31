@@ -100,7 +100,9 @@ export default class TodoItem {
     })
   }
 
-  static find(filter?: Partial<TodoItemModel>): Promise<TodoItemModel[]> {
+  static find(
+    filter?: Partial<TodoItemModel> & { overrideIncompleteItems?: boolean }
+  ): Promise<TodoItemModel[]> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
@@ -133,6 +135,13 @@ export default class TodoItem {
       }
     })
 
+    let incompleteClause = ''
+    if (filter?.overrideIncompleteItems) {
+      incompleteClause = conditionals.length
+        ? ' or isCompleted = 0'
+        : 'isCompleted = 0'
+    }
+
     return new Promise((resolve, reject) => {
       databaseHandle.all(
         `
@@ -150,7 +159,12 @@ export default class TodoItem {
             timezoneCompleted
           from
             todoItems
-          ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
+          ${
+            conditionals.length > 0
+              ? `where (${conditionals.join(' and ')})`
+              : ''
+          }
+          ${incompleteClause}
         `,
         params,
         (error, rows: TodoItemModel[]) => {
