@@ -6,6 +6,21 @@ import TodoItem from '../models/TodoItem'
 const resolvers: Resolvers = {
   TodoItem: {
     isCompleted: (todoItem) => Boolean(todoItem.isCompleted),
+    dateCompleted: (todoItem) =>
+      todoItem.dateCompleted &&
+      todoItem.timeCompleted &&
+      todoItem.timezoneCompleted
+        ? {
+            date: todoItem.dateCompleted,
+            time: todoItem.timeCompleted,
+            timezone: todoItem.timezoneCompleted,
+          }
+        : null,
+    dateCreated: (todoItem) => ({
+      date: todoItem.dateCreated,
+      time: todoItem.timeCreated,
+      timezone: todoItem.timezoneCreated,
+    }),
   },
   Query: {
     todoItem: async (root, { id }) => {
@@ -23,7 +38,7 @@ const resolvers: Resolvers = {
               timezoneCreated: input.dateCreated?.timezone,
               description: input.description ?? undefined,
               id: input.id ?? undefined,
-              isCompleted: input.isCompleted ?? undefined,
+              isCompleted: input.isCompleted ? 1 : 0,
               notes: input.notes ?? undefined,
               title: input.title ?? undefined,
             }
@@ -33,7 +48,12 @@ const resolvers: Resolvers = {
   },
   Mutation: {
     createTodoItem: async (root, { input }) => {
-      const id = await TodoItem.create({ title: input.title })
+      const id = await TodoItem.create({
+        title: input.title,
+        dateCreated: input.dateCreated.date,
+        timeCreated: input.dateCreated.time,
+        timezoneCreated: input.dateCreated.timezone,
+      })
 
       return (await TodoItem.find({ id }))[0]
     },
@@ -66,18 +86,20 @@ export default createModule({
   dirname: __dirname,
   typeDefs: [
     gql`
+      type Date {
+        date: String!
+        time: String!
+        timezone: String!
+      }
+
       type TodoItem {
         id: ID!
         title: String!
         description: String
         notes: String
         isCompleted: Boolean!
-        dateCreated: String!
-        timeCreated: String!
-        timezoneCreated: String!
-        dateCompleted: String
-        timeCompleted: String
-        timezoneCompleted: String
+        dateCreated: Date!
+        dateCompleted: Date
       }
 
       input DateInput {
@@ -117,7 +139,7 @@ export default createModule({
       }
 
       extend type Mutation {
-        createTodoItem(input: CreateTodoItemInput!): TodoItem
+        createTodoItem(input: CreateTodoItemInput!): TodoItem!
         deleteTodoItem(id: String!): String!
         updateTodoItem(input: UpdateTodoItemInput!): TodoItem!
       }

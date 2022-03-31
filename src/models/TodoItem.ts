@@ -12,6 +12,9 @@ type ValueOf<T> = T[keyof T]
 
 export interface CreateTodoItemArgs {
   title: string
+  dateCreated: string
+  timeCreated: string
+  timezoneCreated: string
 }
 
 export default class TodoItem {
@@ -69,13 +72,24 @@ export default class TodoItem {
             ?,
             ?,
             ?,
+            ?,
+            ?,
             ?
           )
         `,
-        [id, args.title, 0, new Date().toISOString()],
+        [
+          id,
+          args.title,
+          0,
+          args.dateCreated,
+          args.timeCreated,
+          args.timezoneCreated,
+        ],
         (error) => {
           if (error) {
             reject(error)
+            logger.log('error', `Error creating todo item: ${error.message}`)
+            return
           }
 
           logger.log('info', `Created todo item ${id}`)
@@ -86,14 +100,14 @@ export default class TodoItem {
     })
   }
 
-  static find(filter?: Partial<TodoItemGql>): Promise<TodoItemModel[]> {
+  static find(filter?: Partial<TodoItemModel>): Promise<TodoItemModel[]> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
       throw new Error('No database connection')
     }
 
-    const filterParams: (keyof TodoItemGql)[] = [
+    const filterParams: (keyof TodoItemModel)[] = [
       'id',
       'description',
       'isCompleted',
@@ -108,7 +122,7 @@ export default class TodoItem {
     ]
 
     const conditionals: string[] = []
-    const params: ValueOf<TodoItemGql>[] = []
+    const params: ValueOf<TodoItemModel>[] = []
 
     filterParams.forEach((param) => {
       let filterParam = filter ? filter[param] : undefined
@@ -142,6 +156,8 @@ export default class TodoItem {
         (error, rows: TodoItemModel[]) => {
           if (error) {
             reject(error)
+            logger.log('error', `Error finding todo items: ${error.message}`)
+            return
           }
 
           logger.log('info', 'Found todo items')
@@ -168,6 +184,8 @@ export default class TodoItem {
         (error) => {
           if (error) {
             reject()
+            logger.log('error', `Error deleting todo item: ${error.message}`)
+            return
           }
 
           logger.log('info', `Successfully deleted todo item ${id}`)
@@ -221,6 +239,8 @@ export default class TodoItem {
         (error) => {
           if (error) {
             reject(error)
+            logger.log('error', `Error updating todo item: ${error.message}`)
+            return
           }
 
           logger.log('info', `Successfully updated todo item ${args.id}`)

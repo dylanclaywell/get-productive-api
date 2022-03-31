@@ -16,9 +16,9 @@ CREATE TABLE "todoItems" (
     "dateCreated" TEXT NOT NULL,
 	"timeCreated" TEXT NOT NULL,
 	"timezoneCreated" TEXT NOT NULL,
-    "dateCompleted" TEXT NOT NULL,
-	"timeCompleted" TEXT NOT NULL,
-	"timezoneCompleted" TEXT NOT NULL,
+    "dateCompleted" TEXT,
+	"timeCompleted" TEXT,
+	"timezoneCompleted" TEXT,
     PRIMARY KEY("id")
 );
 ```

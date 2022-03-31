@@ -20,6 +20,13 @@ export type CreateTodoItemInput = {
   title: Scalars['String'];
 };
 
+export type Date = {
+  __typename?: 'Date';
+  date: Scalars['String'];
+  time: Scalars['String'];
+  timezone: Scalars['String'];
+};
+
 export type DateInput = {
   date: Scalars['String'];
   time: Scalars['String'];
@@ -38,7 +45,7 @@ export type GetTodoItemsInput = {
 
 export type Mutation = {
   __typename?: 'Mutation';
-  createTodoItem?: Maybe<TodoItem>;
+  createTodoItem: TodoItem;
   deleteTodoItem: Scalars['String'];
   updateTodoItem: TodoItem;
 };
@@ -76,16 +83,12 @@ export type QueryTodoItemsArgs = {
 
 export type TodoItem = {
   __typename?: 'TodoItem';
-  dateCompleted?: Maybe<Scalars['String']>;
-  dateCreated: Scalars['String'];
+  dateCompleted?: Maybe<Date>;
+  dateCreated: Date;
   description?: Maybe<Scalars['String']>;
   id: Scalars['ID'];
   isCompleted: Scalars['Boolean'];
   notes?: Maybe<Scalars['String']>;
-  timeCompleted?: Maybe<Scalars['String']>;
-  timeCreated: Scalars['String'];
-  timezoneCompleted?: Maybe<Scalars['String']>;
-  timezoneCreated: Scalars['String'];
   title: Scalars['String'];
 };
 
@@ -170,6 +173,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateTodoItemInput: CreateTodoItemInput;
+  Date: ResolverTypeWrapper<Date>;
   DateInput: DateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
@@ -184,6 +188,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   CreateTodoItemInput: CreateTodoItemInput;
+  Date: Date;
   DateInput: DateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: Scalars['ID'];
@@ -194,8 +199,15 @@ export type ResolversParentTypes = {
   UpdateTodoItemInput: UpdateTodoItemInput;
 };
 
+export type DateResolvers<ContextType = any, ParentType extends ResolversParentTypes['Date'] = ResolversParentTypes['Date']> = {
+  date?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  time?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createTodoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
+  createTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
   deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id'>>;
   updateTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationUpdateTodoItemArgs, 'input'>>;
 };
@@ -206,21 +218,18 @@ export type QueryResolvers<ContextType = any, ParentType extends ResolversParent
 };
 
 export type TodoItemResolvers<ContextType = any, ParentType extends ResolversParentTypes['TodoItem'] = ResolversParentTypes['TodoItem']> = {
-  dateCompleted?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  dateCreated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  dateCompleted?: Resolver<Maybe<ResolversTypes['Date']>, ParentType, ContextType>;
+  dateCreated?: Resolver<ResolversTypes['Date'], ParentType, ContextType>;
   description?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isCompleted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   notes?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  timeCompleted?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  timeCreated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  timezoneCompleted?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  timezoneCreated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = any> = {
+  Date?: DateResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   TodoItem?: TodoItemResolvers<ContextType>;
