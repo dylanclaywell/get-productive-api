@@ -16,12 +16,19 @@ export type Scalars = {
 };
 
 export type CreateTodoItemInput = {
+  dateCreated: DateInput;
   title: Scalars['String'];
 };
 
+export type DateInput = {
+  date: Scalars['String'];
+  time: Scalars['String'];
+  timezone: Scalars['String'];
+};
+
 export type GetTodoItemsInput = {
-  dateCompleted?: InputMaybe<Scalars['String']>;
-  dateCreated?: InputMaybe<Scalars['String']>;
+  dateCompleted?: InputMaybe<DateInput>;
+  dateCreated?: InputMaybe<DateInput>;
   description?: InputMaybe<Scalars['String']>;
   id?: InputMaybe<Scalars['ID']>;
   isCompleted?: InputMaybe<Scalars['Boolean']>;
@@ -75,12 +82,16 @@ export type TodoItem = {
   id: Scalars['ID'];
   isCompleted: Scalars['Boolean'];
   notes?: Maybe<Scalars['String']>;
+  timeCompleted?: Maybe<Scalars['String']>;
+  timeCreated: Scalars['String'];
+  timezoneCompleted?: Maybe<Scalars['String']>;
+  timezoneCreated: Scalars['String'];
   title: Scalars['String'];
 };
 
 export type UpdateTodoItemInput = {
-  dateCompleted?: InputMaybe<Scalars['String']>;
-  dateCreated?: InputMaybe<Scalars['String']>;
+  dateCompleted?: InputMaybe<DateInput>;
+  dateCreated?: InputMaybe<DateInput>;
   description?: InputMaybe<Scalars['String']>;
   id: Scalars['ID'];
   isCompleted?: InputMaybe<Scalars['Boolean']>;
@@ -159,6 +170,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars['Boolean']>;
   CreateTodoItemInput: CreateTodoItemInput;
+  DateInput: DateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Mutation: ResolverTypeWrapper<{}>;
@@ -172,6 +184,7 @@ export type ResolversTypes = {
 export type ResolversParentTypes = {
   Boolean: Scalars['Boolean'];
   CreateTodoItemInput: CreateTodoItemInput;
+  DateInput: DateInput;
   GetTodoItemsInput: GetTodoItemsInput;
   ID: Scalars['ID'];
   Mutation: {};
@@ -199,6 +212,10 @@ export type TodoItemResolvers<ContextType = any, ParentType extends ResolversPar
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isCompleted?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   notes?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  timeCompleted?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  timeCreated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  timezoneCompleted?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
+  timezoneCreated?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };

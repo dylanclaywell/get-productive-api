@@ -62,7 +62,9 @@ export default class TodoItem {
             id,
             title,
             isCompleted,
-            dateCreated
+            dateCreated,
+            timeCreated,
+            timezoneCreated
           ) values (
             ?,
             ?,
@@ -98,7 +100,11 @@ export default class TodoItem {
       'notes',
       'title',
       'dateCompleted',
+      'timeCompleted',
+      'timezoneCompleted',
       'dateCreated',
+      'timeCreated',
+      'timezoneCreated',
     ]
 
     const conditionals: string[] = []
@@ -107,22 +113,7 @@ export default class TodoItem {
     filterParams.forEach((param) => {
       let filterParam = filter ? filter[param] : undefined
       if (filterParam !== undefined && filterParam !== null) {
-        if (
-          typeof filterParam === 'string' &&
-          (param === 'dateCreated' || param === 'dateCompleted')
-        ) {
-          conditionals.push(`date(${param}) = ?`)
-          const date = new Date(filterParam)
-          filterParam = `${date.getUTCFullYear()}-${
-            date.getUTCMonth() + 1 < 10
-              ? `0${date.getUTCMonth() + 1}`
-              : date.getUTCMonth() + 1
-          }-${
-            date.getUTCDate() < 10 ? `0${date.getUTCDate()}` : date.getUTCDate()
-          }`
-        } else {
-          conditionals.push(`${param} = ?`)
-        }
+        conditionals.push(`${param} = ?`)
 
         params.push(filterParam)
       }
@@ -138,11 +129,14 @@ export default class TodoItem {
             notes,
             isCompleted,
             dateCreated,
-            dateCompleted
+            timeCreated,
+            timezoneCreated,
+            dateCompleted,
+            timeCompleted,
+            timezoneCompleted
           from
             todoItems
           ${conditionals.length > 0 ? `where ${conditionals.join('and')}` : ''}
-          or isCompleted = 0
         `,
         params,
         (error, rows: TodoItemModel[]) => {
@@ -184,24 +178,28 @@ export default class TodoItem {
     })
   }
 
-  static update(args: UpdateTodoItemInput): Promise<void> {
+  static update(args: Partial<TodoItemModel>): Promise<void> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
       throw new Error('No database connection')
     }
 
-    const updateParams: (keyof UpdateTodoItemInput)[] = [
+    const updateParams: (keyof Partial<TodoItemModel>)[] = [
       'description',
       'isCompleted',
       'notes',
       'title',
       'dateCompleted',
+      'timeCompleted',
+      'timezoneCompleted',
       'dateCreated',
+      'timeCreated',
+      'timezoneCreated',
     ]
 
     const set: string[] = []
-    const params: ValueOf<TodoItemGql>[] = []
+    const params: ValueOf<TodoItemModel>[] = []
 
     updateParams.forEach((updateParam) => {
       const param = args ? args[updateParam] : undefined

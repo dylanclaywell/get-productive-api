@@ -15,8 +15,12 @@ const resolvers: Resolvers = {
       return await TodoItem.find(
         input
           ? {
-              dateCompleted: input.dateCompleted,
-              dateCreated: input.dateCreated ?? undefined,
+              dateCompleted: input.dateCompleted?.date,
+              timeCompleted: input.dateCompleted?.time,
+              timezoneCompleted: input.dateCompleted?.timezone,
+              dateCreated: input.dateCreated?.date,
+              timeCreated: input.dateCreated?.time,
+              timezoneCreated: input.dateCreated?.timezone,
               description: input.description ?? undefined,
               id: input.id ?? undefined,
               isCompleted: input.isCompleted ?? undefined,
@@ -39,7 +43,18 @@ const resolvers: Resolvers = {
       return id
     },
     updateTodoItem: async (root, { input }) => {
-      await TodoItem.update(input)
+      await TodoItem.update({
+        description: input?.description,
+        id: input?.id,
+        isCompleted: input?.isCompleted ? 1 : 0,
+        notes: input?.notes,
+        dateCompleted: input?.dateCompleted?.date,
+        timeCompleted: input?.dateCompleted?.time,
+        timezoneCompleted: input?.dateCompleted?.timezone,
+        dateCreated: input?.dateCreated?.date,
+        timeCreated: input?.dateCreated?.time,
+        timezoneCreated: input?.dateCreated?.timezone,
+      })
 
       return (await TodoItem.find({ id: input.id }))[0]
     },
@@ -58,11 +73,22 @@ export default createModule({
         notes: String
         isCompleted: Boolean!
         dateCreated: String!
+        timeCreated: String!
+        timezoneCreated: String!
         dateCompleted: String
+        timeCompleted: String
+        timezoneCompleted: String
+      }
+
+      input DateInput {
+        date: String!
+        time: String!
+        timezone: String!
       }
 
       input CreateTodoItemInput {
         title: String!
+        dateCreated: DateInput!
       }
 
       input UpdateTodoItemInput {
@@ -71,8 +97,8 @@ export default createModule({
         description: String
         notes: String
         isCompleted: Boolean
-        dateCreated: String
-        dateCompleted: String
+        dateCreated: DateInput
+        dateCompleted: DateInput
       }
 
       input GetTodoItemsInput {
@@ -81,8 +107,8 @@ export default createModule({
         description: String
         notes: String
         isCompleted: Boolean
-        dateCreated: String
-        dateCompleted: String
+        dateCreated: DateInput
+        dateCompleted: DateInput
       }
 
       extend type Query {

@@ -14,7 +14,11 @@ CREATE TABLE "todoItems" (
     "notes" TEXT,
     "isCompleted" INTEGER CHECK(isCompleted in ('0', '1')),
     "dateCreated" TEXT NOT NULL,
-    "dateCompleted" TEXT,
+	"timeCreated" TEXT NOT NULL,
+	"timezoneCreated" TEXT NOT NULL,
+    "dateCompleted" TEXT NOT NULL,
+	"timeCompleted" TEXT NOT NULL,
+	"timezoneCompleted" TEXT NOT NULL,
     PRIMARY KEY("id")
 );
 ```
