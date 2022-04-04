@@ -96,7 +96,12 @@ const resolvers: Resolvers = {
       await TodoItem.update({
         description: nullable(input.description),
         id: input.id,
-        isCompleted: input.isCompleted ? 1 : 0,
+        isCompleted:
+          input.isCompleted !== undefined
+            ? input.isCompleted
+              ? 1
+              : 0
+            : undefined,
         notes: nullable(input.notes),
         dateCompleted: nullableDateInput(input.dateCompleted, 'date'),
         timeCompleted: nullableDateInput(input.dateCompleted, 'time'),
