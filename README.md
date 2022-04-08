@@ -33,7 +33,7 @@ CREATE TABLE "todoItemTags" (
 	"tagId" TEXT NOT NULL,
 	"todoItemId" TEXT NOT NULL,
 	PRIMARY KEY("tagId", "todoItemId"),
-	FOREIGN KEY("tagId") REFERENCES todoItems("id"),
-	FOREIGN KEY("todoItemId") REFERENCES tags("id")
+	FOREIGN KEY("todoItemId") REFERENCES todoItems("id"),
+	FOREIGN KEY("tagId") REFERENCES tags("id")
 );
 ```

@@ -1,7 +1,7 @@
 import { createModule, gql } from 'graphql-modules'
 
 import { Resolvers, DateInput } from '../generated/graphql'
-import { TodoItem } from '../models'
+import { Tag, TodoItem } from '../models'
 import nullable from '../utils/nullable'
 
 function nullableDateInput(
@@ -37,6 +37,9 @@ const resolvers: Resolvers = {
       time: todoItem.timeCreated,
       timezone: todoItem.timezoneCreated,
     }),
+    tags: (todoItem) => {
+      return Tag.findByTodoItemId(todoItem.id)
+    },
   },
   Query: {
     todoItem: async (root, { id }) => {
@@ -128,6 +131,7 @@ export default createModule({
         isCompleted: Boolean!
         dateCreated: Date!
         dateCompleted: Date
+        tags: [Tag!]!
       }
 
       input DateInput {

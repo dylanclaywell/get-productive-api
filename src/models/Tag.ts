@@ -85,6 +85,40 @@ export default class Tag {
     )
   }
 
+  static async findByTodoItemId(id: string) {
+    const databaseHandle = getDatabase()
+
+    if (!databaseHandle) {
+      throw new Error('No database handle')
+    }
+
+    return new Promise<TagModel[]>((resolve, reject) =>
+      databaseHandle.all(
+        `
+        select
+          id,
+          name,
+          color
+        from
+          tags t
+        join
+          todoItemTags tt
+        on
+          t.id = tt.tagId
+          and tt.todoItemId = ?
+        `,
+        [id],
+        (error, rows: TagModel[]) => {
+          if (error) {
+            return reject(error)
+          }
+
+          resolve(rows)
+        }
+      )
+    )
+  }
+
   static async create({
     name,
     color,
