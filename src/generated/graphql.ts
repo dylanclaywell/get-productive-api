@@ -59,6 +59,7 @@ export type Mutation = {
   createTag: Tag;
   createTodoItem: TodoItem;
   deleteTodoItem: Scalars['String'];
+  updateTag: Tag;
   updateTodoItem: TodoItem;
 };
 
@@ -76,6 +77,13 @@ export type MutationCreateTodoItemArgs = {
 
 export type MutationDeleteTodoItemArgs = {
   id: Scalars['String'];
+};
+
+
+export type MutationUpdateTagArgs = {
+  color?: InputMaybe<Scalars['String']>;
+  id: Scalars['ID'];
+  name?: InputMaybe<Scalars['String']>;
 };
 
 
@@ -242,6 +250,7 @@ export type MutationResolvers<ContextType = any, ParentType extends ResolversPar
   createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'color' | 'name'>>;
   createTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
   deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id'>>;
+  updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id'>>;
   updateTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationUpdateTodoItemArgs, 'input'>>;
 };
 

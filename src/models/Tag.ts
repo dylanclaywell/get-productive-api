@@ -58,16 +58,6 @@ export default class Tag {
       }
     })
 
-    console.log(`
-    select
-      id,
-      name,
-      color
-    from
-      tags
-    ${conditionals.length > 0 ? `where (${conditionals.join(' and ')})` : ''}
-  `)
-
     return new Promise((resolve, reject) =>
       databaseHandle.all(
         `
@@ -126,14 +116,59 @@ export default class Tag {
         [id, name, color],
         (error) => {
           if (error) {
-            reject()
             logger.log('error', `Error deleting todo item: ${error.message}`)
-            return
+            return reject()
           }
 
           logger.log('info', `Successfully created todo item ${id}`)
 
           resolve({ id })
+        }
+      )
+    )
+  }
+
+  static update(
+    args: { id: string } & Omit<Partial<TagModel>, 'id'>
+  ): Promise<void> {
+    const databaseHandle = getDatabase()
+
+    if (!databaseHandle) {
+      throw new Error('No database connection')
+    }
+
+    const updateParams: (keyof TagModel)[] = ['name', 'color']
+
+    const updates: string[] = []
+    const params: ValueOf<TagModel>[] = []
+
+    updateParams.forEach((param) => {
+      let updateParam = args ? args[param] : undefined
+      if (updateParam !== undefined && updateParam !== null) {
+        updates.push(`${param} = ?`)
+
+        params.push(updateParam)
+      }
+    })
+
+    return new Promise((resolve, reject) =>
+      databaseHandle.all(
+        `
+          update
+            tags
+          set
+          ${updates.length > 0 ? updates.join(',') : ''}
+          where
+            id = ?
+        `,
+        [...params, args.id],
+        (error) => {
+          if (error) {
+            logger.log('error', `Error updating todo item: ${error.message}`)
+            return reject()
+          }
+
+          resolve()
         }
       )
     )

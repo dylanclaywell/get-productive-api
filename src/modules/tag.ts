@@ -15,6 +15,15 @@ const resolvers: Resolvers = {
 
       return (await Tag.find({ id }))[0]
     },
+    updateTag: async (root, { id, name, color }) => {
+      await Tag.update({
+        id,
+        name: name ?? undefined,
+        color: color ?? undefined,
+      })
+
+      return (await Tag.find({ id }))[0]
+    },
   },
 }
 
@@ -35,6 +44,7 @@ export default createModule({
 
       extend type Mutation {
         createTag(name: String!, color: String!): Tag!
+        updateTag(id: ID!, name: String, color: String): Tag!
       }
     `,
   ],

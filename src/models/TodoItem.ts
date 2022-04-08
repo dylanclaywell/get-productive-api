@@ -86,9 +86,8 @@ export default class TodoItem {
         ],
         (error) => {
           if (error) {
-            reject(error)
             logger.log('error', `Error creating todo item: ${error.message}`)
-            return
+            return reject(error)
           }
 
           logger.log('info', `Created todo item ${id}`)
@@ -168,9 +167,8 @@ export default class TodoItem {
         params,
         (error, rows: TodoItemModel[]) => {
           if (error) {
-            reject(error)
             logger.log('error', `Error finding todo items: ${error.message}`)
-            return
+            return reject(error)
           }
 
           logger.log('info', 'Found todo items')
@@ -196,9 +194,8 @@ export default class TodoItem {
         [id],
         (error) => {
           if (error) {
-            reject()
             logger.log('error', `Error deleting todo item: ${error.message}`)
-            return
+            return reject()
           }
 
           logger.log('info', `Successfully deleted todo item ${id}`)
@@ -251,9 +248,8 @@ export default class TodoItem {
         [...params, args.id],
         (error) => {
           if (error) {
-            reject(error)
             logger.log('error', `Error updating todo item: ${error.message}`)
-            return
+            return reject(error)
           }
 
           logger.log('info', `Successfully updated todo item ${args.id}`)
