@@ -1,15 +1,8 @@
 import { createModule, gql } from 'graphql-modules'
 
 import { Resolvers, DateInput } from '../generated/graphql'
-import TodoItem from '../models/TodoItem'
-
-function nullable<Field>(field: Field) {
-  if (field === null) {
-    return null
-  }
-
-  return field
-}
+import { TodoItem } from '../models'
+import nullable from '../utils/nullable'
 
 function nullableDateInput(
   dateInput: DateInput | null | undefined,

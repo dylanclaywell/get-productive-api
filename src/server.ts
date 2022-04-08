@@ -4,8 +4,7 @@ import { graphqlHTTP } from 'express-graphql'
 import cors from 'cors'
 import { createApplication } from 'graphql-modules'
 
-import rootModule from './modules/root'
-import todoItemModule from './modules/todoItem'
+import { root, tag, todoItem } from './modules'
 import getDatabase, { connectToDatabase } from './lib/database'
 import logger from './logger'
 
@@ -15,7 +14,7 @@ export function startServer({ port }: { port: number }) {
   app.use(express.json())
 
   const application = createApplication({
-    modules: [rootModule, todoItemModule],
+    modules: [root, todoItem, tag],
   })
 
   const schema = application.schema

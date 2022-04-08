@@ -1,4 +1,4 @@
-export type TodoItemModel = {
+export interface TodoItemModel {
   id: string
   title: string
   description: string | null
@@ -11,3 +11,12 @@ export type TodoItemModel = {
   timeCompleted: string | null
   timezoneCompleted: string | null
 }
+
+export interface TagModel {
+  id: string
+  name: string
+  color: string
+}
+
+export { default as Tag } from './Tag'
+export { default as TodoItem } from './TodoItem'

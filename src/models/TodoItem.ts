@@ -6,9 +6,8 @@ import {
 } from '../generated/graphql'
 import getDatabase from '../lib/database'
 import logger from '../logger'
+import { ValueOf } from '../utils/ValueOf'
 import { TodoItemModel } from './index'
-
-type ValueOf<T> = T[keyof T]
 
 export interface CreateTodoItemArgs {
   title: string

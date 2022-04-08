@@ -9,3 +9,4 @@ generates:
     config:
       mappers:
         TodoItem: ../models#TodoItemModel
+        Tag: ../models#TagModel
