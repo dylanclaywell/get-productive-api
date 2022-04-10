@@ -1,13 +1,13 @@
 {
   "name": "productivity-api",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "./build/src/index.js",
   "repository": "https://github.com/dylanclaywell/productivity-api.git",
   "author": "Dylan Claywell <djclaywell@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon",
-    "start:server": "node build/src/index.js",
+    "dev": "nodemon",
+    "start": "node build/src/index.js",
     "build": "tsc",
     "codegen": "graphql-codegen --config codegen.yml"
   },
