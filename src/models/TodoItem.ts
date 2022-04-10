@@ -4,10 +4,11 @@ import {
   UpdateTodoItemInput,
   TodoItem as TodoItemGql,
 } from '../generated/graphql'
-import getDatabase from '../lib/database'
+import getDatabase from '../database'
 import logger from '../logger'
 import { ValueOf } from '../utils/ValueOf'
 import { TodoItemModel } from './index'
+import datastore from '../datastore'
 
 export interface CreateTodoItemArgs {
   userId: string
@@ -49,7 +50,7 @@ export default class TodoItem {
     return id
   }
 
-  static create(args: CreateTodoItemArgs): Promise<string> {
+  static async create(args: CreateTodoItemArgs): Promise<string> {
     const databaseHandle = getDatabase()
 
     if (!databaseHandle) {
@@ -57,6 +58,19 @@ export default class TodoItem {
     }
 
     const id = this.generateNewId()
+
+    await datastore.insert({
+      key: datastore.key('todoItem'),
+      data: {
+        id,
+        userId: args.userId,
+        title: args.title,
+        isCompleted: false,
+        dateCreated: args.dateCreated,
+        timeCreated: args.timeCreated,
+        timezoneCreated: args.timezoneCreated,
+      },
+    })
 
     return new Promise<string>((resolve, reject) => {
       databaseHandle.run(
@@ -102,7 +116,7 @@ export default class TodoItem {
     })
   }
 
-  static find(
+  static async find(
     filter?: Partial<TodoItemModel> & {
       overrideIncompleteItems?: boolean
       userId: string
@@ -131,9 +145,12 @@ export default class TodoItem {
     const conditionals: string[] = []
     const params: ValueOf<TodoItemModel>[] = []
 
+    const query = datastore.createQuery('todoItem')
+
     filterParams.forEach((param) => {
       let filterParam = filter ? filter[param] : undefined
       if (filterParam !== undefined && filterParam !== null) {
+        query.filters.push({ name: param, op: '=', val: filterParam })
         conditionals.push(`${param} = ?`)
 
         params.push(filterParam)
@@ -141,50 +158,60 @@ export default class TodoItem {
     })
 
     let incompleteClause = ''
+    const incompleteTodoitems = []
     if (filter?.overrideIncompleteItems) {
+      const incompleteQuery = datastore
+        .createQuery('todoItem')
+        .filter('isCompleted', '=', false)
+      const [incomplete] = await datastore.runQuery(incompleteQuery)
+      incompleteTodoitems.push(...incomplete)
       incompleteClause = conditionals.length
         ? ' or isCompleted = 0'
         : 'isCompleted = 0'
     }
 
-    return new Promise((resolve, reject) => {
-      databaseHandle.all(
-        `
-          select
-            id,
-            userId,
-            title,
-            description,
-            notes,
-            isCompleted,
-            dateCreated,
-            timeCreated,
-            timezoneCreated,
-            dateCompleted,
-            timeCompleted,
-            timezoneCompleted
-          from
-            todoItems
-          ${
-            conditionals.length > 0
-              ? `where (${conditionals.join(' and ')})`
-              : ''
-          }
-          ${incompleteClause}
-        `,
-        params,
-        (error, rows: TodoItemModel[]) => {
-          if (error) {
-            logger.log('error', `Error finding todo items: ${error.message}`)
-            return reject(error)
-          }
+    const [todoItems] = await datastore.runQuery(query)
 
-          logger.log('info', 'Found todo items')
+    return [...todoItems, ...incompleteTodoitems] as TodoItemModel[]
 
-          resolve(rows)
-        }
-      )
-    })
+    // return new Promise((resolve, reject) => {
+    //   databaseHandle.all(
+    //     `
+    //       select
+    //         id,
+    //         userId,
+    //         title,
+    //         description,
+    //         notes,
+    //         isCompleted,
+    //         dateCreated,
+    //         timeCreated,
+    //         timezoneCreated,
+    //         dateCompleted,
+    //         timeCompleted,
+    //         timezoneCompleted
+    //       from
+    //         todoItems
+    //       ${
+    //         conditionals.length > 0
+    //           ? `where (${conditionals.join(' and ')})`
+    //           : ''
+    //       }
+    //       ${incompleteClause}
+    //     `,
+    //     params,
+    //     (error, rows: TodoItemModel[]) => {
+    //       if (error) {
+    //         logger.log('error', `Error finding todo items: ${error.message}`)
+    //         return reject(error)
+    //       }
+
+    //       logger.log('info', 'Found todo items')
+
+    //       resolve(rows)
+    //     }
+    //   )
+    // })
   }
 
   static delete({ id }: { id: string }): Promise<void> {

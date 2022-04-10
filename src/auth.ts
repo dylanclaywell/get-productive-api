@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import admin, { ServiceAccount } from 'firebase-admin'
 
-import serviceAccount from '../secrets/service-account-key.json'
+import serviceAccount from '../secrets/firebase-service-account-key.json'
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount as ServiceAccount),

@@ -1,7 +1,7 @@
 import { v4 as generateId } from 'uuid'
 
 import { TagModel } from './index'
-import getDatabase from '../lib/database'
+import getDatabase from '../database'
 import logger from '../logger'
 import { ValueOf } from '../utils/ValueOf'
 

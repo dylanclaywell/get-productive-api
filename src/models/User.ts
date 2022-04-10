@@ -1,7 +1,7 @@
 import { v4 as generateId } from 'uuid'
 import { UserModel } from '.'
 
-import getDatabase from '../lib/database'
+import getDatabase from '../database'
 import logger from '../logger'
 
 export default class User {

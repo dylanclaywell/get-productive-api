@@ -5,7 +5,7 @@ let database: sqlite.Database | undefined
 
 export function connectToDatabase(callback: (err: Error | null) => void) {
   database = new sqlite.Database(
-    path.resolve(__dirname, '../../data/database.db'),
+    path.resolve(__dirname, '../data/database.db'),
     callback
   )
 }

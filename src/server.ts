@@ -5,7 +5,7 @@ import cors from 'cors'
 import { createApplication } from 'graphql-modules'
 
 import { root, tag, todoItem, user } from './modules'
-import getDatabase, { connectToDatabase } from './lib/database'
+import getDatabase, { connectToDatabase } from './database'
 import logger from './logger'
 import authMiddleware from './auth'
 

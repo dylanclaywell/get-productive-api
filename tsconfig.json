@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
     "strict": true,
-    "target": "ESNext",
+    "target": "ES5",
     "lib": ["ESNext"],
     "sourceMap": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "typeRoots": ["node_modules/@types"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "outDir": "build"
   },
-  "exclude": ["node_modules", "dist", "coverage", "./src/**/*.test.ts"],
+  "exclude": ["node_modules", "build", "coverage", "./src/**/*.test.ts"],
   "include": ["./src/**/*.ts"]
 }
