@@ -21,7 +21,7 @@ export function startServer({ port }: { port: number }) {
   const execute = application.createExecution()
 
   const corsOptions: cors.CorsOptions = {
-    origin: ['http://localhost:3000'],
+    origin: ['http://localhost:3000', 'https://getproductive.app'],
   }
 
   app.use(cors(corsOptions))
