@@ -14,7 +14,8 @@ export interface CreateTodoItemArgs {
 
 export default class TodoItem {
   static async todoItemExists(id: string): Promise<boolean> {
-    return Boolean(await datastore.get(datastore.key(['todoItem', id])))
+    const [todoItem] = await datastore.get(datastore.key(['todoItem', id]))
+    return Boolean(todoItem)
   }
 
   static async generateNewId() {

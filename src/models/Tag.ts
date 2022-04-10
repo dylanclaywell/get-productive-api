@@ -5,7 +5,8 @@ import datastore from '../datastore'
 
 export default class Tag {
   static async tagExists(id: string): Promise<boolean> {
-    return Boolean(await datastore.get(datastore.key(['tag', id])))
+    const [tag] = await datastore.get(datastore.key(['tag', id]))
+    return Boolean(tag)
   }
 
   static async generateNewId() {
