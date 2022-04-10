@@ -10,6 +10,7 @@ import { ValueOf } from '../utils/ValueOf'
 import { TodoItemModel } from './index'
 
 export interface CreateTodoItemArgs {
+  userId: string
   title: string
   dateCreated: string
   timeCreated: string
@@ -61,6 +62,7 @@ export default class TodoItem {
       databaseHandle.run(
         `
           insert into todoItems (
+            userId,
             id,
             title,
             isCompleted,
@@ -73,10 +75,12 @@ export default class TodoItem {
             ?,
             ?,
             ?,
+            ?,
             ?
           )
         `,
         [
+          args.userId,
           id,
           args.title,
           0,
@@ -99,7 +103,10 @@ export default class TodoItem {
   }
 
   static find(
-    filter?: Partial<TodoItemModel> & { overrideIncompleteItems?: boolean }
+    filter?: Partial<TodoItemModel> & {
+      overrideIncompleteItems?: boolean
+      userId: string
+    }
   ): Promise<TodoItemModel[]> {
     const databaseHandle = getDatabase()
 
@@ -145,6 +152,7 @@ export default class TodoItem {
         `
           select
             id,
+            userId,
             title,
             description,
             notes,

@@ -18,6 +18,7 @@ export type Scalars = {
 export type CreateTodoItemInput = {
   dateCreated: DateInput;
   title: Scalars['String'];
+  uid: Scalars['String'];
 };
 
 export type Date = {
@@ -52,12 +53,14 @@ export type GetTodoItemsInput = {
   isCompleted?: InputMaybe<Scalars['Boolean']>;
   notes?: InputMaybe<Scalars['String']>;
   title?: InputMaybe<Scalars['String']>;
+  uid: Scalars['String'];
 };
 
 export type Mutation = {
   __typename?: 'Mutation';
   createTag: Tag;
   createTodoItem: TodoItem;
+  createUser?: Maybe<Status>;
   deleteTodoItem: Scalars['String'];
   updateTag: Tag;
   updateTodoItem: TodoItem;
@@ -75,8 +78,14 @@ export type MutationCreateTodoItemArgs = {
 };
 
 
+export type MutationCreateUserArgs = {
+  uid: Scalars['String'];
+};
+
+
 export type MutationDeleteTodoItemArgs = {
   id: Scalars['String'];
+  uid: Scalars['String'];
 };
 
 
@@ -101,11 +110,17 @@ export type Query = {
 
 export type QueryTodoItemArgs = {
   id: Scalars['String'];
+  uid: Scalars['String'];
 };
 
 
 export type QueryTodoItemsArgs = {
-  input?: InputMaybe<GetTodoItemsInput>;
+  input: GetTodoItemsInput;
+};
+
+export type Status = {
+  __typename?: 'Status';
+  success: Scalars['Boolean'];
 };
 
 export type Tag = {
@@ -135,6 +150,7 @@ export type UpdateTodoItemInput = {
   isCompleted?: InputMaybe<Scalars['Boolean']>;
   notes?: InputMaybe<Scalars['String']>;
   title?: InputMaybe<Scalars['String']>;
+  uid: Scalars['String'];
 };
 
 
@@ -216,6 +232,7 @@ export type ResolversTypes = {
   ID: ResolverTypeWrapper<Scalars['ID']>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
+  Status: ResolverTypeWrapper<Status>;
   String: ResolverTypeWrapper<Scalars['String']>;
   Tag: ResolverTypeWrapper<TagModel>;
   TodoItem: ResolverTypeWrapper<TodoItemModel>;
@@ -234,6 +251,7 @@ export type ResolversParentTypes = {
   ID: Scalars['ID'];
   Mutation: {};
   Query: {};
+  Status: Status;
   String: Scalars['String'];
   Tag: TagModel;
   TodoItem: TodoItemModel;
@@ -250,15 +268,21 @@ export type DateResolvers<ContextType = any, ParentType extends ResolversParentT
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'color' | 'name'>>;
   createTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
-  deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id'>>;
+  createUser?: Resolver<Maybe<ResolversTypes['Status']>, ParentType, ContextType, RequireFields<MutationCreateUserArgs, 'uid'>>;
+  deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id' | 'uid'>>;
   updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id'>>;
   updateTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationUpdateTodoItemArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
   tags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType>;
-  todoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemArgs, 'id'>>;
-  todoItems?: Resolver<Array<ResolversTypes['TodoItem']>, ParentType, ContextType, Partial<QueryTodoItemsArgs>>;
+  todoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemArgs, 'id' | 'uid'>>;
+  todoItems?: Resolver<Array<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemsArgs, 'input'>>;
+};
+
+export type StatusResolvers<ContextType = any, ParentType extends ResolversParentTypes['Status'] = ResolversParentTypes['Status']> = {
+  success?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type TagResolvers<ContextType = any, ParentType extends ResolversParentTypes['Tag'] = ResolversParentTypes['Tag']> = {
@@ -284,6 +308,7 @@ export type Resolvers<ContextType = any> = {
   Date?: DateResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
+  Status?: StatusResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
   TodoItem?: TodoItemResolvers<ContextType>;
 };

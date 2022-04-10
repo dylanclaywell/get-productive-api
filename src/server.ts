@@ -4,9 +4,10 @@ import { graphqlHTTP } from 'express-graphql'
 import cors from 'cors'
 import { createApplication } from 'graphql-modules'
 
-import { root, tag, todoItem } from './modules'
+import { root, tag, todoItem, user } from './modules'
 import getDatabase, { connectToDatabase } from './lib/database'
 import logger from './logger'
+import authMiddleware from './auth'
 
 export function startServer({ port }: { port: number }) {
   const app = express()
@@ -14,7 +15,7 @@ export function startServer({ port }: { port: number }) {
   app.use(express.json())
 
   const application = createApplication({
-    modules: [root, todoItem, tag],
+    modules: [root, todoItem, tag, user],
   })
 
   const schema = application.schema
@@ -25,6 +26,8 @@ export function startServer({ port }: { port: number }) {
   }
 
   app.use(cors(corsOptions))
+
+  app.use(authMiddleware)
 
   app.use(
     '/',

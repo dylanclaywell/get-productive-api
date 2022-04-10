@@ -1,7 +1,7 @@
 import { createModule, gql } from 'graphql-modules'
 
 import { Resolvers, DateInput } from '../generated/graphql'
-import { Tag, TodoItem } from '../models'
+import { Tag, TodoItem, User } from '../models'
 import nullable from '../utils/nullable'
 
 function nullableDateInput(
@@ -37,18 +37,31 @@ const resolvers: Resolvers = {
       time: todoItem.timeCreated,
       timezone: todoItem.timezoneCreated,
     }),
-    tags: (todoItem) => {
+    tags: async (todoItem) => {
       return Tag.findByTodoItemId(todoItem.id)
     },
   },
   Query: {
-    todoItem: async (root, { id }) => {
-      return (await TodoItem.find({ id }))[0]
+    todoItem: async (root, { id, uid }) => {
+      const userId = (await User.find({ uid }))[0]?.id
+
+      if (!userId) {
+        throw new Error('User not found')
+      }
+
+      return (await TodoItem.find({ id, userId }))[0]
     },
     todoItems: async (root, { input }) => {
+      const userId = (await User.find({ uid: input.uid }))[0]?.id
+
+      if (!userId) {
+        throw new Error('User not found')
+      }
+
       return await TodoItem.find(
         input
           ? {
+              userId,
               dateCompleted: input.dateCompleted?.date ?? undefined,
               timeCompleted: input.dateCompleted?.time ?? undefined,
               timezoneCompleted: input.dateCompleted?.timezone ?? undefined,
@@ -68,28 +81,70 @@ const resolvers: Resolvers = {
               overrideIncompleteItems:
                 input.filters?.overrideIncompleteItems ?? false,
             }
-          : undefined
+          : { userId }
       )
     },
   },
   Mutation: {
     createTodoItem: async (root, { input }) => {
+      const userId = (await User.find({ uid: input.uid }))[0]?.id
+
+      if (!userId) {
+        throw new Error('User not found')
+      }
+
       const id = await TodoItem.create({
+        userId,
         title: input.title,
         dateCreated: input.dateCreated.date,
         timeCreated: input.dateCreated.time,
         timezoneCreated: input.dateCreated.timezone,
       })
 
-      return (await TodoItem.find({ id }))[0]
+      return (await TodoItem.find({ id, userId }))[0]
     },
-    deleteTodoItem: async (root, { id }) => {
+    deleteTodoItem: async (root, { id, uid }) => {
+      const userId = (await User.find({ uid }))[0]?.id
+
+      if (!userId) {
+        throw new Error('User not found')
+      }
+
+      const todoItem = (await TodoItem.find({ id, userId }))?.[0]
+
+      if (!todoItem) {
+        throw new Error('Todo item does not exist')
+      }
+
+      if (userId !== todoItem.userId) {
+        throw new Error('User does not own todo item')
+      }
+
       await TodoItem.delete({ id })
 
       return id
     },
     updateTodoItem: async (root, { input }) => {
+      const user = (await User.find({ uid: input.uid }))[0]
+
+      if (!user) {
+        throw new Error('User not found')
+      }
+
+      const todoItem = (
+        await TodoItem.find({ id: input.id, userId: user.id })
+      )?.[0]
+
+      if (!todoItem) {
+        throw new Error('Todo item does not exist')
+      }
+
+      if (user.id !== todoItem.userId) {
+        throw new Error('User does not own todo item')
+      }
+
       await TodoItem.update({
+        userId: user.id,
         description: nullable(input.description),
         id: input.id,
         isCompleted:
@@ -105,9 +160,10 @@ const resolvers: Resolvers = {
         dateCreated: input.dateCreated?.date,
         timeCreated: input.dateCreated?.time,
         timezoneCreated: input.dateCreated?.timezone,
+        title: input.title ?? undefined,
       })
 
-      return (await TodoItem.find({ id: input.id }))[0]
+      return (await TodoItem.find({ id: input.id, userId: user.id }))[0]
     },
   },
 }
@@ -151,12 +207,14 @@ export default createModule({
       }
 
       input CreateTodoItemInput {
+        uid: String!
         title: String!
         dateCreated: DateInput!
       }
 
       input UpdateTodoItemInput {
         id: ID!
+        uid: String!
         title: String
         description: String
         notes: String
@@ -167,6 +225,7 @@ export default createModule({
 
       input GetTodoItemsInput {
         id: ID
+        uid: String!
         title: String
         description: String
         notes: String
@@ -177,13 +236,13 @@ export default createModule({
       }
 
       extend type Query {
-        todoItem(id: String!): TodoItem
-        todoItems(input: GetTodoItemsInput): [TodoItem!]!
+        todoItem(id: String!, uid: String!): TodoItem
+        todoItems(input: GetTodoItemsInput!): [TodoItem!]!
       }
 
       extend type Mutation {
         createTodoItem(input: CreateTodoItemInput!): TodoItem!
-        deleteTodoItem(id: String!): String!
+        deleteTodoItem(id: String!, uid: String!): String!
         updateTodoItem(input: UpdateTodoItemInput!): TodoItem!
       }
     `,

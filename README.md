@@ -7,15 +7,24 @@ API backend for the Productivity frontend
 Until I programatically create the database, here are the SQL statements needed for the application to run:
 
 ```sql
+CREATE TABLE "users" (
+	"id" TEXT NOT NULL UNIQUE,
+	"uid" TEXT NOT NULL UNIQUE,
+	PRIMARY KEY("id")
+);
+
 CREATE TABLE "tags" (
 	"id" TEXT NOT NULL UNIQUE,
+	"userId" TEXT NOT NULL,
 	"name" TEXT NOT NULL,
 	"color" TEXT NOT NULL,
-	PRIMARY KEY("id")
+	PRIMARY KEY("id"),
+	FOREIGN KEY("userId") REFERENCES users("id")
 );
 
 CREATE TABLE "todoItems" (
     "id" TEXT NOT NULL UNIQUE,
+	"userId" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
     "notes" TEXT,
@@ -26,7 +35,8 @@ CREATE TABLE "todoItems" (
     "dateCompleted" TEXT,
 	"timeCompleted" TEXT,
 	"timezoneCompleted" TEXT,
-    PRIMARY KEY("id")
+    PRIMARY KEY("id"),
+	FOREIGN KEY("userId") REFERENCES users("id")
 );
 
 CREATE TABLE "todoItemTags" (
