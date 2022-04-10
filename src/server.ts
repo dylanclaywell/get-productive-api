@@ -4,8 +4,7 @@ import { graphqlHTTP } from 'express-graphql'
 import cors from 'cors'
 import { createApplication } from 'graphql-modules'
 
-import { root, tag, todoItem, user } from './modules'
-import getDatabase, { connectToDatabase } from './database'
+import { root, tag, todoItem } from './modules'
 import logger from './logger'
 import authMiddleware from './auth'
 
@@ -15,7 +14,7 @@ export function startServer({ port }: { port: number }) {
   app.use(express.json())
 
   const application = createApplication({
-    modules: [root, todoItem, tag, user],
+    modules: [root, todoItem, tag],
   })
 
   const schema = application.schema
@@ -38,24 +37,15 @@ export function startServer({ port }: { port: number }) {
     })
   )
 
-  return new Promise((resolve) => {
-    connectToDatabase((error) => {
-      if (error || !getDatabase()) {
-        logger.log('error', 'Could not connect to database')
-        process.exit(1)
-      }
+  logger.log('info', 'Connected to SQLite database')
 
-      logger.log('info', 'Connected to SQLite database')
-
-      const server = app.listen(port, () => {
-        logger.log('info', `Listening at http://localhost:${port}`)
-      })
-
-      setupCloseOnExit(server)
-
-      resolve(server)
-    })
+  const server = app.listen(port, () => {
+    logger.log('info', `Listening at http://localhost:${port}`)
   })
+
+  setupCloseOnExit(server)
+
+  return server
 }
 
 function setupCloseOnExit(server: http.Server) {

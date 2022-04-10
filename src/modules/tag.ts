@@ -1,6 +1,6 @@
 import { createModule, gql } from 'graphql-modules'
 
-import { Resolvers, DateInput } from '../generated/graphql'
+import { Resolvers } from '../generated/graphql'
 import { Tag } from '../models'
 
 const resolvers: Resolvers = {
@@ -16,10 +16,12 @@ const resolvers: Resolvers = {
       return (await Tag.find({ id }))[0]
     },
     updateTag: async (root, { id, name, color }) => {
+      const todoItem = (await Tag.find({ id }))[0]
+
       await Tag.update({
-        id,
-        name: name ?? undefined,
-        color: color ?? undefined,
+        ...todoItem,
+        ...(name && { name }),
+        ...(color && { color }),
       })
 
       return (await Tag.find({ id }))[0]

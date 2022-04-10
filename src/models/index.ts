@@ -1,21 +1,20 @@
 export interface TodoItemModel {
   id: string
-  userId: string
+  uid: string
   title: string
-  description: string | null
-  notes: string | null
-  isCompleted: number
+  description?: string
+  notes?: string
+  isCompleted: boolean
   dateCreated: string
   timeCreated: string
   timezoneCreated: string
-  dateCompleted: string | null
-  timeCompleted: string | null
-  timezoneCompleted: string | null
+  dateCompleted?: string
+  timeCompleted?: string
+  timezoneCompleted?: string
 }
 
 export interface TagModel {
   id: string
-  userId: string
   name: string
   color: string
 }
@@ -26,5 +25,4 @@ export interface UserModel {
 }
 
 export { default as Tag } from './Tag'
-export { default as User } from './User'
 export { default as TodoItem } from './TodoItem'

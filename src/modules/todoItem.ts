@@ -1,23 +1,7 @@
 import { createModule, gql } from 'graphql-modules'
 
-import { Resolvers, DateInput } from '../generated/graphql'
-import { Tag, TodoItem, User } from '../models'
-import nullable from '../utils/nullable'
-
-function nullableDateInput(
-  dateInput: DateInput | null | undefined,
-  key: keyof DateInput
-) {
-  if (dateInput === null) {
-    return null
-  }
-
-  if (dateInput?.[key] === null) {
-    return null
-  }
-
-  return dateInput?.[key]
-}
+import { Resolvers } from '../generated/graphql'
+import { Tag, TodoItem } from '../models'
 
 const resolvers: Resolvers = {
   TodoItem: {
@@ -38,85 +22,73 @@ const resolvers: Resolvers = {
       timezone: todoItem.timezoneCreated,
     }),
     tags: async (todoItem) => {
-      return Tag.findByTodoItemId(todoItem.id)
+      return Tag.findByTodoItemId(todoItem.id, todoItem.uid)
     },
   },
   Query: {
     todoItem: async (root, { id, uid }) => {
-      const userId = (await User.find({ uid }))[0]?.id
-
-      if (!userId) {
-        throw new Error('User not found')
-      }
-
-      return (await TodoItem.find({ id, userId }))[0]
+      return (await TodoItem.find({ id, uid }))[0]
     },
     todoItems: async (root, { input }) => {
-      const userId = (await User.find({ uid: input.uid }))[0]?.id
-
-      if (!userId) {
-        throw new Error('User not found')
-      }
+      const {
+        uid,
+        dateCompleted,
+        dateCreated,
+        description,
+        filters,
+        id,
+        isCompleted,
+        notes,
+        title,
+      } = input
 
       return await TodoItem.find(
         input
           ? {
-              userId,
-              dateCompleted: input.dateCompleted?.date ?? undefined,
-              timeCompleted: input.dateCompleted?.time ?? undefined,
-              timezoneCompleted: input.dateCompleted?.timezone ?? undefined,
-              dateCreated: input.dateCreated?.date ?? undefined,
-              timeCreated: input.dateCreated?.time ?? undefined,
-              timezoneCreated: input.dateCreated?.timezone ?? undefined,
-              description: input.description ?? undefined,
-              id: input.id ?? undefined,
-              isCompleted:
-                input.isCompleted === null || input.isCompleted === undefined
-                  ? undefined
-                  : input.isCompleted
-                  ? 1
-                  : 0,
-              notes: input.notes ?? undefined,
-              title: input.title ?? undefined,
+              uid,
+              ...(dateCompleted && {
+                dateCompleted: dateCompleted.date ?? undefined,
+                timeCompleted: dateCompleted.time ?? undefined,
+                timezoneCompleted: dateCompleted.timezone ?? undefined,
+              }),
+              ...(dateCreated && {
+                dateCreated: dateCreated.date ?? undefined,
+                timeCreated: dateCreated.time ?? undefined,
+                timezoneCreated: dateCreated.timezone ?? undefined,
+              }),
+              ...(description && { description }),
+              ...(id && { id }),
+              ...(isCompleted !== null &&
+                isCompleted !== undefined && { isCompleted }),
+              ...(notes && { notes }),
+              ...(title && { title }),
               overrideIncompleteItems:
-                input.filters?.overrideIncompleteItems ?? false,
+                filters?.overrideIncompleteItems ?? false,
             }
-          : { userId }
+          : { uid }
       )
     },
   },
   Mutation: {
     createTodoItem: async (root, { input }) => {
-      const userId = (await User.find({ uid: input.uid }))[0]?.id
-
-      if (!userId) {
-        throw new Error('User not found')
-      }
-
       const id = await TodoItem.create({
-        userId,
+        uid: input.uid,
         title: input.title,
         dateCreated: input.dateCreated.date,
         timeCreated: input.dateCreated.time,
         timezoneCreated: input.dateCreated.timezone,
       })
 
-      return (await TodoItem.find({ id, userId }))[0]
+      return (await TodoItem.find({ id, uid: input.uid }))[0]
     },
     deleteTodoItem: async (root, { id, uid }) => {
-      const userId = (await User.find({ uid }))[0]?.id
-
-      if (!userId) {
-        throw new Error('User not found')
-      }
-
-      const todoItem = (await TodoItem.find({ id, userId }))?.[0]
+      const todoItem = (await TodoItem.find({ id, uid }))?.[0]
 
       if (!todoItem) {
         throw new Error('Todo item does not exist')
       }
 
-      if (userId !== todoItem.userId) {
+      if (uid !== todoItem.uid) {
         throw new Error('User does not own todo item')
       }
 
@@ -125,45 +97,81 @@ const resolvers: Resolvers = {
       return id
     },
     updateTodoItem: async (root, { input }) => {
-      const user = (await User.find({ uid: input.uid }))[0]
-
-      if (!user) {
-        throw new Error('User not found')
-      }
-
-      const todoItem = (
-        await TodoItem.find({ id: input.id, userId: user.id })
-      )?.[0]
+      const {
+        uid,
+        dateCompleted,
+        dateCreated,
+        description,
+        id,
+        isCompleted,
+        notes,
+        title,
+      } = input
+      const todoItem = (await TodoItem.find({ id: input.id, uid }))?.[0]
 
       if (!todoItem) {
         throw new Error('Todo item does not exist')
       }
 
-      if (user.id !== todoItem.userId) {
+      if (uid !== todoItem.uid) {
         throw new Error('User does not own todo item')
       }
 
+      const updateKeys = [
+        'dateCompleted',
+        'dateCreated',
+        'description',
+        'id',
+        'isCompleted',
+        'notes',
+        'title',
+      ] as const
+
+      const mappedTodoItem = todoItem
+
+      for (const key of updateKeys) {
+        const value = input[key]
+        if (value !== undefined && value !== null) {
+          // Lots of type hacks, probably need to fix this at some point
+          if (key === 'dateCompleted') {
+            mappedTodoItem.dateCompleted = input.dateCompleted!.date
+            mappedTodoItem.timeCompleted = input.dateCompleted!.time
+            mappedTodoItem.timezoneCompleted = input.dateCompleted!.timezone
+          } else if (key === 'dateCreated') {
+            mappedTodoItem.dateCreated = input.dateCreated!.date
+            mappedTodoItem.timeCreated = input.dateCreated!.time
+            mappedTodoItem.timezoneCreated = input.dateCreated!.timezone
+          } else {
+            ;(mappedTodoItem[key] as any) = value
+          }
+        }
+
+        if (value === null) {
+          delete mappedTodoItem[key]
+        }
+      }
+
       await TodoItem.update({
-        userId: user.id,
-        description: nullable(input.description),
-        id: input.id,
-        isCompleted:
-          input.isCompleted !== undefined
-            ? input.isCompleted
-              ? 1
-              : 0
-            : undefined,
-        notes: nullable(input.notes),
-        dateCompleted: nullableDateInput(input.dateCompleted, 'date'),
-        timeCompleted: nullableDateInput(input.dateCompleted, 'time'),
-        timezoneCompleted: nullableDateInput(input.dateCompleted, 'timezone'),
-        dateCreated: input.dateCreated?.date,
-        timeCreated: input.dateCreated?.time,
-        timezoneCreated: input.dateCreated?.timezone,
-        title: input.title ?? undefined,
+        ...todoItem,
+        ...(dateCompleted && {
+          dateCompleted: dateCompleted.date,
+          timeCompleted: dateCompleted.time,
+          timezoneCompleted: dateCompleted.timezone,
+        }),
+        ...(dateCreated && {
+          dateCreated: dateCreated.date ?? undefined,
+          timeCreated: dateCreated.time ?? undefined,
+          timezoneCreated: dateCreated.timezone ?? undefined,
+        }),
+        ...(description && { description }),
+        ...(id && { id }),
+        ...(isCompleted !== null &&
+          isCompleted !== undefined && { isCompleted }),
+        ...(notes && { notes }),
+        ...(title && { title }),
       })
 
-      return (await TodoItem.find({ id: input.id, userId: user.id }))[0]
+      return (await TodoItem.find({ id: input.id, uid }))[0]
     },
   },
 }
