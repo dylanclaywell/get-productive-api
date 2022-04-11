@@ -37,8 +37,6 @@ export function startServer({ port }: { port: number }) {
     })
   )
 
-  logger.log('info', 'Connected to SQLite database')
-
   const server = app.listen(port, () => {
     logger.log('info', `Listening at http://localhost:${port}`)
   })

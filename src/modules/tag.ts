@@ -10,13 +10,17 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    createTag: async (root, { name, color }) => {
-      const { id } = await Tag.create({ name, color })
+    createTag: async (root, { name, color, uid }) => {
+      const { id } = await Tag.create({ name, color, uid })
 
-      return (await Tag.find({ id }))[0]
+      return (await Tag.find({ id, uid }))[0]
     },
-    updateTag: async (root, { id, name, color }) => {
-      const todoItem = (await Tag.find({ id }))[0]
+    updateTag: async (root, { id, name, color, uid }) => {
+      const todoItem = (await Tag.find({ id, uid }))[0]
+
+      if (todoItem.uid !== uid) {
+        throw new Error('User does not own tag')
+      }
 
       await Tag.update({
         ...todoItem,
@@ -24,7 +28,18 @@ const resolvers: Resolvers = {
         ...(color && { color }),
       })
 
-      return (await Tag.find({ id }))[0]
+      return (await Tag.find({ id, uid }))[0]
+    },
+    deleteTag: async (root, { id, uid }) => {
+      const tag = Tag.find({ id, uid })
+
+      if (!tag) {
+        throw new Error('Could not find tag')
+      }
+
+      await Tag.delete(id)
+
+      return { success: true }
     },
   },
 }
@@ -34,6 +49,10 @@ export default createModule({
   dirname: __dirname,
   typeDefs: [
     gql`
+      type Status {
+        success: Boolean!
+      }
+
       type Tag {
         id: ID!
         name: String!
@@ -41,12 +60,13 @@ export default createModule({
       }
 
       extend type Query {
-        tags: [Tag!]!
+        tags(uid: String!): [Tag!]!
       }
 
       extend type Mutation {
-        createTag(name: String!, color: String!): Tag!
-        updateTag(id: ID!, name: String, color: String): Tag!
+        createTag(name: String!, color: String!, uid: String!): Tag!
+        updateTag(id: ID!, name: String, color: String, uid: String!): Tag!
+        deleteTag(id: ID!, uid: String!): Status!
       }
     `,
   ],

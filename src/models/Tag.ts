@@ -18,7 +18,9 @@ export default class Tag {
     return id
   }
 
-  static async find(filter?: Partial<TagModel>): Promise<TagModel[]> {
+  static async find(
+    filter?: Partial<TagModel> & { uid: string }
+  ): Promise<TagModel[]> {
     const filterParams: (keyof TagModel)[] = ['id', 'name', 'color']
 
     const query = datastore.createQuery('tag')
@@ -35,21 +37,14 @@ export default class Tag {
     return tags
   }
 
-  static async findByTodoItemId(id: string, uid: string) {
-    const [tags] = await datastore
-      .createQuery('todoItemTag')
-      .filter('todoItemId', '=', id)
-      .run()
-
-    return tags
-  }
-
   static async create({
     name,
     color,
+    uid,
   }: {
     name: string
     color: string
+    uid: string
   }): Promise<{ id: string }> {
     const id = await this.generateNewId()
 
@@ -57,6 +52,7 @@ export default class Tag {
       key: datastore.key(['tag', id]),
       data: {
         id,
+        uid,
         name,
         color,
       },
@@ -70,5 +66,9 @@ export default class Tag {
       key: datastore.key(['tag', args.id]),
       data: args,
     })
+  }
+
+  static async delete(id: string) {
+    await datastore.delete(datastore.key(['tag', id]))
   }
 }

@@ -11,10 +11,12 @@ export interface TodoItemModel {
   dateCompleted?: string
   timeCompleted?: string
   timezoneCompleted?: string
+  tags: TagModel[]
 }
 
 export interface TagModel {
   id: string
+  uid: string
   name: string
   color: string
 }

@@ -22,7 +22,25 @@ const resolvers: Resolvers = {
       timezone: todoItem.timezoneCreated,
     }),
     tags: async (todoItem) => {
-      return Tag.findByTodoItemId(todoItem.id, todoItem.uid)
+      const todoItems = await TodoItem.find({
+        id: todoItem.id,
+        uid: todoItem.uid,
+      })
+
+      if (!todoItems.length) {
+        return []
+      }
+
+      const item = todoItems[0]
+
+      return (
+        item.tags
+          ?.map(
+            async (tag) =>
+              (await Tag.find({ id: tag.id, uid: todoItem.uid }))[0]
+          )
+          .filter(Boolean) ?? []
+      )
     },
   },
   Query: {
@@ -125,6 +143,7 @@ const resolvers: Resolvers = {
         'isCompleted',
         'notes',
         'title',
+        'tags',
       ] as const
 
       const mappedTodoItem = todoItem
@@ -220,6 +239,10 @@ export default createModule({
         dateCreated: DateInput!
       }
 
+      input TagInput {
+        id: ID!
+      }
+
       input UpdateTodoItemInput {
         id: ID!
         uid: String!
@@ -229,6 +252,7 @@ export default createModule({
         isCompleted: Boolean
         dateCreated: DateInput
         dateCompleted: DateInput
+        tags: [TagInput!]
       }
 
       input GetTodoItemsInput {
