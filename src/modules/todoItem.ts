@@ -33,14 +33,17 @@ const resolvers: Resolvers = {
 
       const item = todoItems[0]
 
-      return (
-        item.tags
-          ?.map(
-            async (tag) =>
-              (await Tag.find({ id: tag.id, uid: todoItem.uid }))[0]
-          )
-          .filter(Boolean) ?? []
-      )
+      const tags = []
+
+      for (const tag of item.tags ?? []) {
+        const foundTag = (await Tag.find({ id: tag.id, uid: todoItem.uid }))[0]
+
+        if (foundTag) {
+          tags.push(foundTag)
+        }
+      }
+
+      return tags
     },
   },
   Query: {

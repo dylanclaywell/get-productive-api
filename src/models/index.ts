@@ -11,7 +11,7 @@ export interface TodoItemModel {
   dateCompleted?: string
   timeCompleted?: string
   timezoneCompleted?: string
-  tags: TagModel[]
+  tags?: TagModel[]
 }
 
 export interface TagModel {
