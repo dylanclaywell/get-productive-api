@@ -18,7 +18,6 @@ export type Scalars = {
 export type CreateTodoItemInput = {
   dateCreated: DateInput;
   title: Scalars['String'];
-  uid: Scalars['String'];
 };
 
 export type Date = {
@@ -53,7 +52,6 @@ export type GetTodoItemsInput = {
   isCompleted?: InputMaybe<Scalars['Boolean']>;
   notes?: InputMaybe<Scalars['String']>;
   title?: InputMaybe<Scalars['String']>;
-  uid: Scalars['String'];
 };
 
 export type Mutation = {
@@ -62,6 +60,7 @@ export type Mutation = {
   createTodoItem: TodoItem;
   deleteTag: Status;
   deleteTodoItem: Scalars['String'];
+  setTheme: Scalars['Boolean'];
   updateTag: Tag;
   updateTodoItem: TodoItem;
 };
@@ -70,7 +69,6 @@ export type Mutation = {
 export type MutationCreateTagArgs = {
   color: Scalars['String'];
   name: Scalars['String'];
-  uid: Scalars['String'];
 };
 
 
@@ -81,13 +79,16 @@ export type MutationCreateTodoItemArgs = {
 
 export type MutationDeleteTagArgs = {
   id: Scalars['ID'];
-  uid: Scalars['String'];
 };
 
 
 export type MutationDeleteTodoItemArgs = {
   id: Scalars['String'];
-  uid: Scalars['String'];
+};
+
+
+export type MutationSetThemeArgs = {
+  theme: Scalars['String'];
 };
 
 
@@ -95,7 +96,6 @@ export type MutationUpdateTagArgs = {
   color?: InputMaybe<Scalars['String']>;
   id: Scalars['ID'];
   name?: InputMaybe<Scalars['String']>;
-  uid: Scalars['String'];
 };
 
 
@@ -106,19 +106,14 @@ export type MutationUpdateTodoItemArgs = {
 export type Query = {
   __typename?: 'Query';
   tags: Array<Tag>;
+  theme: Theme;
   todoItem?: Maybe<TodoItem>;
   todoItems: Array<TodoItem>;
 };
 
 
-export type QueryTagsArgs = {
-  uid: Scalars['String'];
-};
-
-
 export type QueryTodoItemArgs = {
   id: Scalars['String'];
-  uid: Scalars['String'];
 };
 
 
@@ -142,6 +137,11 @@ export type TagInput = {
   id: Scalars['ID'];
 };
 
+export type Theme = {
+  __typename?: 'Theme';
+  type: Scalars['String'];
+};
+
 export type TodoItem = {
   __typename?: 'TodoItem';
   dateCompleted?: Maybe<Date>;
@@ -163,7 +163,6 @@ export type UpdateTodoItemInput = {
   notes?: InputMaybe<Scalars['String']>;
   tags?: InputMaybe<Array<TagInput>>;
   title?: InputMaybe<Scalars['String']>;
-  uid: Scalars['String'];
 };
 
 
@@ -249,6 +248,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']>;
   Tag: ResolverTypeWrapper<TagModel>;
   TagInput: TagInput;
+  Theme: ResolverTypeWrapper<Theme>;
   TodoItem: ResolverTypeWrapper<TodoItemModel>;
   UpdateTodoItemInput: UpdateTodoItemInput;
 };
@@ -269,6 +269,7 @@ export type ResolversParentTypes = {
   String: Scalars['String'];
   Tag: TagModel;
   TagInput: TagInput;
+  Theme: Theme;
   TodoItem: TodoItemModel;
   UpdateTodoItemInput: UpdateTodoItemInput;
 };
@@ -281,17 +282,19 @@ export type DateResolvers<ContextType = any, ParentType extends ResolversParentT
 };
 
 export type MutationResolvers<ContextType = any, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'color' | 'name' | 'uid'>>;
+  createTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationCreateTagArgs, 'color' | 'name'>>;
   createTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationCreateTodoItemArgs, 'input'>>;
-  deleteTag?: Resolver<ResolversTypes['Status'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id' | 'uid'>>;
-  deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id' | 'uid'>>;
-  updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id' | 'uid'>>;
+  deleteTag?: Resolver<ResolversTypes['Status'], ParentType, ContextType, RequireFields<MutationDeleteTagArgs, 'id'>>;
+  deleteTodoItem?: Resolver<ResolversTypes['String'], ParentType, ContextType, RequireFields<MutationDeleteTodoItemArgs, 'id'>>;
+  setTheme?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationSetThemeArgs, 'theme'>>;
+  updateTag?: Resolver<ResolversTypes['Tag'], ParentType, ContextType, RequireFields<MutationUpdateTagArgs, 'id'>>;
   updateTodoItem?: Resolver<ResolversTypes['TodoItem'], ParentType, ContextType, RequireFields<MutationUpdateTodoItemArgs, 'input'>>;
 };
 
 export type QueryResolvers<ContextType = any, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  tags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType, RequireFields<QueryTagsArgs, 'uid'>>;
-  todoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemArgs, 'id' | 'uid'>>;
+  tags?: Resolver<Array<ResolversTypes['Tag']>, ParentType, ContextType>;
+  theme?: Resolver<ResolversTypes['Theme'], ParentType, ContextType>;
+  todoItem?: Resolver<Maybe<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemArgs, 'id'>>;
   todoItems?: Resolver<Array<ResolversTypes['TodoItem']>, ParentType, ContextType, RequireFields<QueryTodoItemsArgs, 'input'>>;
 };
 
@@ -304,6 +307,11 @@ export type TagResolvers<ContextType = any, ParentType extends ResolversParentTy
   color?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ThemeResolvers<ContextType = any, ParentType extends ResolversParentTypes['Theme'] = ResolversParentTypes['Theme']> = {
+  type?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -325,6 +333,7 @@ export type Resolvers<ContextType = any> = {
   Query?: QueryResolvers<ContextType>;
   Status?: StatusResolvers<ContextType>;
   Tag?: TagResolvers<ContextType>;
+  Theme?: ThemeResolvers<ContextType>;
   TodoItem?: TodoItemResolvers<ContextType>;
 };
 

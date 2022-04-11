@@ -10,12 +10,12 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    createTag: async (root, { name, color, uid }) => {
+    createTag: async (root, { name, color }, { uid }) => {
       const { id } = await Tag.create({ name, color, uid })
 
       return (await Tag.find({ id, uid }))[0]
     },
-    updateTag: async (root, { id, name, color, uid }) => {
+    updateTag: async (root, { id, name, color }, { uid }) => {
       const todoItem = (await Tag.find({ id, uid }))[0]
 
       if (todoItem.uid !== uid) {
@@ -30,7 +30,7 @@ const resolvers: Resolvers = {
 
       return (await Tag.find({ id, uid }))[0]
     },
-    deleteTag: async (root, { id, uid }) => {
+    deleteTag: async (root, { id }, { uid }) => {
       const tag = Tag.find({ id, uid })
 
       if (!tag) {
@@ -60,13 +60,13 @@ export default createModule({
       }
 
       extend type Query {
-        tags(uid: String!): [Tag!]!
+        tags: [Tag!]!
       }
 
       extend type Mutation {
-        createTag(name: String!, color: String!, uid: String!): Tag!
-        updateTag(id: ID!, name: String, color: String, uid: String!): Tag!
-        deleteTag(id: ID!, uid: String!): Status!
+        createTag(name: String!, color: String!): Tag!
+        updateTag(id: ID!, name: String, color: String): Tag!
+        deleteTag(id: ID!): Status!
       }
     `,
   ],

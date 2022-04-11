@@ -4,7 +4,7 @@ import { graphqlHTTP } from 'express-graphql'
 import cors from 'cors'
 import { createApplication } from 'graphql-modules'
 
-import { root, tag, todoItem } from './modules'
+import { root, tag, todoItem, setting } from './modules'
 import logger from './logger'
 import authMiddleware from './auth'
 
@@ -14,14 +14,18 @@ export function startServer({ port }: { port: number }) {
   app.use(express.json())
 
   const application = createApplication({
-    modules: [root, todoItem, tag],
+    modules: [root, todoItem, tag, setting],
   })
 
   const schema = application.schema
   const execute = application.createExecution()
 
   const corsOptions: cors.CorsOptions = {
-    origin: ['http://localhost:3000', 'https://getproductive.app'],
+    origin: [
+      'http://localhost:3000',
+      'https://getproductive.app',
+      'https://getproductive-346715.uc.r.appspot.com/',
+    ],
   }
 
   app.use(cors(corsOptions))

@@ -21,10 +21,10 @@ const resolvers: Resolvers = {
       time: todoItem.timeCreated,
       timezone: todoItem.timezoneCreated,
     }),
-    tags: async (todoItem) => {
+    tags: async (todoItem, {}, { uid }) => {
       const todoItems = await TodoItem.find({
         id: todoItem.id,
-        uid: todoItem.uid,
+        uid,
       })
 
       if (!todoItems.length) {
@@ -36,7 +36,7 @@ const resolvers: Resolvers = {
       const tags = []
 
       for (const tag of item.tags ?? []) {
-        const foundTag = (await Tag.find({ id: tag.id, uid: todoItem.uid }))[0]
+        const foundTag = (await Tag.find({ id: tag.id, uid }))[0]
 
         if (foundTag) {
           tags.push(foundTag)
@@ -47,12 +47,11 @@ const resolvers: Resolvers = {
     },
   },
   Query: {
-    todoItem: async (root, { id, uid }) => {
+    todoItem: async (root, { id }, { uid }) => {
       return (await TodoItem.find({ id, uid }))[0]
     },
-    todoItems: async (root, { input }) => {
+    todoItems: async (root, { input }, { uid }) => {
       const {
-        uid,
         dateCompleted,
         dateCreated,
         description,
@@ -91,18 +90,18 @@ const resolvers: Resolvers = {
     },
   },
   Mutation: {
-    createTodoItem: async (root, { input }) => {
+    createTodoItem: async (root, { input }, { uid }) => {
       const id = await TodoItem.create({
-        uid: input.uid,
+        uid,
         title: input.title,
         dateCreated: input.dateCreated.date,
         timeCreated: input.dateCreated.time,
         timezoneCreated: input.dateCreated.timezone,
       })
 
-      return (await TodoItem.find({ id, uid: input.uid }))[0]
+      return (await TodoItem.find({ id, uid }))[0]
     },
-    deleteTodoItem: async (root, { id, uid }) => {
+    deleteTodoItem: async (root, { id }, { uid }) => {
       const todoItem = (await TodoItem.find({ id, uid }))?.[0]
 
       if (!todoItem) {
@@ -117,9 +116,8 @@ const resolvers: Resolvers = {
 
       return id
     },
-    updateTodoItem: async (root, { input }) => {
+    updateTodoItem: async (root, { input }, { uid }) => {
       const {
-        uid,
         dateCompleted,
         dateCreated,
         description,
@@ -237,7 +235,6 @@ export default createModule({
       }
 
       input CreateTodoItemInput {
-        uid: String!
         title: String!
         dateCreated: DateInput!
       }
@@ -248,7 +245,6 @@ export default createModule({
 
       input UpdateTodoItemInput {
         id: ID!
-        uid: String!
         title: String
         description: String
         notes: String
@@ -260,7 +256,6 @@ export default createModule({
 
       input GetTodoItemsInput {
         id: ID
-        uid: String!
         title: String
         description: String
         notes: String
@@ -271,13 +266,13 @@ export default createModule({
       }
 
       extend type Query {
-        todoItem(id: String!, uid: String!): TodoItem
+        todoItem(id: String!): TodoItem
         todoItems(input: GetTodoItemsInput!): [TodoItem!]!
       }
 
       extend type Mutation {
         createTodoItem(input: CreateTodoItemInput!): TodoItem!
-        deleteTodoItem(id: String!, uid: String!): String!
+        deleteTodoItem(id: String!): String!
         updateTodoItem(input: UpdateTodoItemInput!): TodoItem!
       }
     `,
